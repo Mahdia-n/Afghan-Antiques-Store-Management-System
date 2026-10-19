@@ -1,0 +1,197 @@
+/* General page design */
+body {
+    background-color: #f8f3e9;
+    color: #34251c;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+/* Main headings */
+h1, h2, h3 {
+    color: #6c4229;
+}
+
+/* Paragraphs */
+p {
+    line-height: 1.7;
+}
+
+/* Links */
+a {
+    color: #8b5e32;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #c49a45;
+}
+
+/* Buttons */
+button {
+    background-color: #6c4229;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #432a1b;
+}
+/* Beautiful website background */
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #f5e6ca, #d8b98a, #8c6239);
+    color: #3e2723;
+}
+
+/* Beautiful headings */
+h1, h2, h3 {
+    color: #5c3218;
+    text-align: center;
+}
+
+/* Paragraph design */
+p {
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+/* Beautiful buttons */
+button {
+    background: #704214;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #a66a35;
+    transform: translateY(-3px);
+}
+
+/* Beautiful links */
+a {
+    color: #704214;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #a0522d;
+}
+/* Market website design */
+body {
+    margin: 0;
+    padding: 25px;
+    font-family: Arial, sans-serif;
+    color: #29251f;
+    background: #f7f3eb;
+}
+
+/* Main headings */
+h1 {
+    text-align: center;
+    color: #75451f;
+    font-size: 36px;
+}
+
+h2, h3 {
+    color: #75451f;
+}
+
+/* Product sections */
+section, article {
+    background: white;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px #00000012;
+}
+
+/* Product images */
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+/* Buttons */
+button {
+    background: #8b5e34;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #5d3a1a;
+    transform: translateY(-2px);
+}
+
+/* Links */
+a {
+    color: #8b5e34;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #c08445;
+}
+
+/* Input fields */
+input, select {
+    padding: 11px;
+    border: 1px solid #d8c5ad;
+    border-radius: 8px;
+    margin: 5px;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f0e5;
+
+    background-image:
+        linear-gradient(
+            rgba(35, 25, 15, 0.45),
+            rgba(35, 25, 15, 0.45)
+        ),
+        url("https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1600&q=80");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+h1 {
+    color: #ffffff;
+    text-align: center;
+    padding-top: 100px;
+}
+
+h2, h3 {
+    color: #75451f;
+}
+
+button {
+    background-color: #8b5e34;
+    color: white;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5d3a1a;
+}
