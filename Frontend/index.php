@@ -1,86 +1,745 @@
-
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $pageTitle = 'Antique Store | Timeless Treasures';
-require __DIR__ . '/includes/header.php';
+$cartCount = (int) ($_SESSION['cart_count'] ?? 0);
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover unique antiques, vintage furniture, collectible clocks, and timeless decorative treasures.">
+    <title><?= htmlspecialchars($pageTitle) ?></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --cream: #f8f3e9;
+            --ivory: #fffdf8;
+            --gold: #b68a3b;
+            --light-gold: #e4c786;
+            --brown: #2c1b12;
+            --muted: #796b5d;
+            --border: #e7dcc8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--cream);
+            color: var(--brown);
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button, a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Navigation */
+
+        .site-header {
+            min-height: 88px;
+            padding: 14px 6%;
+            background: var(--ivory);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 25px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            flex-shrink: 0;
+        }
+
+        .brand-mark {
+            height: 53px;
+            width: 53px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            color: var(--gold);
+            font: 42px 'Cormorant Garamond', serif;
+        }
+
+        .brand-name {
+            font: 600 30px/1.1 'Cormorant Garamond', serif;
+        }
+
+        .brand-tagline {
+            margin-top: 5px;
+            color: #8b682f;
+            font-size: 9px;
+            letter-spacing: 3px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-links > a:not(.signup-button):hover {
+            color: var(--gold);
+        }
+
+        .signup-button {
+            padding: 12px 22px;
+            background: var(--gold);
+            color: white;
+            transition: background .2s;
+        }
+
+        .signup-button:hover,
+        .primary-button:hover {
+            background: var(--brown);
+        }
+
+        .cart-count {
+            display: inline-grid;
+            place-items: center;
+            min-width: 21px;
+            height: 21px;
+            padding: 0 5px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: white;
+            font-size: 10px;
+        }
+
+        .menu-toggle {
+            display: none;
+            border: 0;
+            background: transparent;
+            color: var(--brown);
+            font-size: 27px;
+            cursor: pointer;
+        }
+
+        /* Hero with your antique background */
+
+        .hero {
+            min-height: 590px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 75px 8%;
+            color: white;
+
+            background-image:
+                linear-gradient(
+                    90deg,
+                    rgba(24, 13, 7, .88) 0%,
+                    rgba(24, 13, 7, .66) 42%,
+                    rgba(24, 13, 7, .12) 100%
+                ),
+                url('assets/images/headerbackground.png');
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+        }
+
+        .eyebrow {
+            margin-bottom: 16px;
+            color: var(--gold);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 3px;
+        }
+
+        .hero .eyebrow {
+            color: var(--light-gold);
+        }
+
+        .hero h1 {
+            margin-bottom: 22px;
+            font: 500 clamp(43px, 5.2vw, 72px)/1.04
+                'Cormorant Garamond', serif;
+        }
+
+        .hero h1 span {
+            color: var(--light-gold);
+        }
+
+        .hero-description {
+            max-width: 470px;
+            margin-bottom: 31px;
+            color: #f3eade;
+            font-size: 14px;
+            line-height: 1.9;
+        }
+
+        .primary-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 26px;
+            background: var(--gold);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background .2s, transform .2s;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-note {
+            position: absolute;
+            right: 6%;
+            bottom: 24px;
+            color: var(--light-gold);
+            font-size: 9px;
+            letter-spacing: 2px;
+            z-index: 1;
+        }
+
+        /* Collection introduction */
+
+        .featured-section {
+            padding: 76px 7%;
+        }
+
+        .section-heading {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .section-heading h2,
+        .story-section h2 {
+            margin-bottom: 10px;
+            font: 500 clamp(34px, 4vw, 47px)/1.15
+                'Cormorant Garamond', serif;
+        }
+
+        .section-heading > p:last-child {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .ornament {
+            margin-bottom: 10px;
+            color: var(--gold);
+            font-size: 23px;
+        }
+
+        /* Product cards */
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .product-card {
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            transition: transform .25s, box-shadow .25s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(44, 27, 18, .1);
+        }
+
+        .product-art {
+            height: 210px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background:
+                linear-gradient(135deg, #e8d8bc, #c1a174);
+            color: #68451f;
+            font-size: 70px;
+        }
+
+        .product-art.clock {
+            background: linear-gradient(135deg, #d9c6a5, #8c6740);
+        }
+
+        .product-art.vase {
+            background: linear-gradient(135deg, #eee4d2, #c6b08a);
+        }
+
+        .product-art.cabinet {
+            background: linear-gradient(135deg, #b28c61, #593b25);
+            color: #f2dfb8;
+        }
+
+        .product-art.lamp {
+            background: linear-gradient(135deg, #e8d7b8, #ad8952);
+        }
+
+        .product-info {
+            padding: 21px;
+        }
+
+        .product-category {
+            margin-bottom: 7px;
+            color: var(--gold);
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .product-info h3 {
+            margin-bottom: 9px;
+            font: 600 23px/1.2 'Cormorant Garamond', serif;
+        }
+
+        .product-description {
+            min-height: 42px;
+            margin-bottom: 13px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .product-price {
+            margin-bottom: 17px;
+            color: #805c22;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .product-button {
+            display: block;
+            padding: 11px;
+            border: 1px solid var(--gold);
+            color: #805c22;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            transition: background .2s, color .2s;
+        }
+
+        .product-button:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        .collection-action {
+            margin-top: 38px;
+            text-align: center;
+        }
+
+        /* Brand story */
+
+        .story-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 50px;
+            padding: 60px 8%;
+            background: #eee3d0;
+        }
+
+        .story-section > p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 2;
+        }
+
+        /* Footer */
+
+        .site-footer {
+            padding: 48px 7% 20px;
+            background: var(--brown);
+            color: #eee1ca;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+            gap: 32px;
+        }
+
+        .footer-brand {
+            display: inline-block;
+            margin-bottom: 10px;
+            font: 600 29px 'Cormorant Garamond', serif;
+        }
+
+        .footer-content h3 {
+            margin-bottom: 14px;
+            color: var(--light-gold);
+            font: 600 21px 'Cormorant Garamond', serif;
+        }
+
+        .footer-content p,
+        .footer-content a:not(.footer-brand) {
+            display: block;
+            margin-bottom: 9px;
+            color: #d3c4ae;
+            font-size: 11px;
+        }
+
+        .footer-content a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            margin-top: 32px;
+            padding-top: 18px;
+            border-top: 1px solid #594333;
+            color: #c7b69c;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        /* Mobile navigation and responsive layout */
+
+        @media (max-width: 1000px) {
+            .site-header {
+                padding-left: 4%;
+                padding-right: 4%;
+            }
+
+            .nav-links {
+                gap: 14px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .footer-content {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 680px) {
+            .site-header {
+                min-height: 76px;
+                padding: 12px 5%;
+                flex-wrap: wrap;
+            }
+
+            .brand-mark {
+                width: 43px;
+                height: 43px;
+                font-size: 32px;
+            }
+
+            .brand-name {
+                font-size: 25px;
+            }
+
+            .brand-tagline {
+                font-size: 7px;
+                letter-spacing: 2px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                width: 100%;
+                padding: 20px 0 8px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 17px;
+            }
+
+            .nav-links.open {
+                display: flex;
+            }
+
+            .nav-links a {
+                padding: 5px 0;
+            }
+
+            .nav-links .signup-button {
+                padding: 12px 16px;
+                text-align: center;
+            }
+
+            .hero {
+                min-height: 520px;
+                padding: 55px 7%;
+                background-position: 60% center;
+            }
+
+            .hero h1 {
+                font-size: clamp(40px, 10vw, 55px);
+            }
+
+            .hero-description {
+                font-size: 13px;
+            }
+
+            .hero-note {
+                left: 7%;
+                right: auto;
+                font-size: 8px;
+            }
+
+            .featured-section {
+                padding: 52px 5%;
+            }
+
+            .product-grid {
+                gap: 13px;
+            }
+
+            .product-art {
+                height: 155px;
+                font-size: 53px;
+            }
+
+            .product-info {
+                padding: 13px;
+            }
+
+            .product-info h3 {
+                font-size: 20px;
+            }
+
+            .product-description {
+                font-size: 10px;
+            }
+
+            .story-section {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 42px 7%;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 25px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-art {
+                height: 220px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="site-header">
+    <a href="index.php" class="brand">
+        <span class="brand-mark">A</span>
+        <span>
+            <span class="brand-name">Antique Store</span>
+            <span class="brand-tagline">TIMELESS TREASURES</span>
+        </span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle"
+            type="button" aria-label="Toggle navigation"
+            aria-expanded="false">☰</button>
+
+    <nav class="nav-links" id="navLinks">
+        <a href="index.php">Home</a>
+        <a href="products.php">Products</a>
+
+        <?php if (isset($_SESSION['customer_id'])): ?>
+            <a href="logout.php">Logout</a>
+        <?php else: ?>
+            <a href="login.php">Login</a>
+            <a href="register.php" class="signup-button">Sign Up</a>
+        <?php endif; ?>
+
+        <a href="cart.php" class="cart-link">
+            Cart <span class="cart-count"><?= $cartCount ?></span>
+        </a>
+    </nav>
+</header>
 
 <main>
     <section class="hero">
-        <div class="hero-overlay"></div>
-
         <div class="hero-content">
             <p class="eyebrow">DISCOVER THE BEAUTY OF THE PAST</p>
 
             <h1>
-                Authentic Antiques
-                <br>
+                Authentic Antiques<br>
                 <span>for a Timeless Home</span>
             </h1>
 
             <p class="hero-description">
                 Explore our curated collection of rare and unique antiques,
-                each with a story to tell.
+                each with a story to tell. Find distinctive treasures that
+                bring history and character into your home.
             </p>
 
             <a href="products.php" class="primary-button">
-                Purchase Now <span>→</span>
+                Purchase Now <span aria-hidden="true">→</span>
             </a>
         </div>
+
+        <p class="hero-note">TIMELESS DESIGN · EXCEPTIONAL CRAFTSMANSHIP</p>
     </section>
 
     <section class="featured-section">
         <div class="section-heading">
+            <div class="ornament">✧ ── ❦ ── ✧</div>
             <p class="eyebrow">HANDPICKED FOR YOU</p>
             <h2>Featured Antiques</h2>
-            <p>Discover timeless pieces to bring history into your home.</p>
+            <p>Beautifully crafted pieces, selected for their history and charm.</p>
         </div>
 
         <div class="product-grid">
             <article class="product-card">
-                <img src="assets/images/antique-clock.jpg"
-                     alt="Antique mantel clock">
+                <div class="product-art clock" aria-label="Clock illustration">🕰</div>
                 <div class="product-info">
                     <p class="product-category">TIMEPIECES</p>
                     <h3>Antique Mantel Clock</h3>
+                    <p class="product-description">A timeless accent inspired by traditional craftsmanship.</p>
                     <p class="product-price">$120.00</p>
                     <a href="products.php" class="product-button">Explore Collection</a>
                 </div>
             </article>
 
             <article class="product-card">
-                <img src="assets/images/ceramic-vase.jpg"
-                     alt="Classic ceramic vase">
+                <div class="product-art vase" aria-label="Vase illustration">🏺</div>
                 <div class="product-info">
                     <p class="product-category">CERAMICS</p>
                     <h3>Classic Ceramic Vase</h3>
+                    <p class="product-description">An elegant decorative piece for a classic interior.</p>
                     <p class="product-price">$95.00</p>
                     <a href="products.php" class="product-button">Explore Collection</a>
                 </div>
             </article>
 
             <article class="product-card">
-                <img src="assets/images/wooden-cabinet.jpg"
-                     alt="Vintage wooden cabinet">
+                <div class="product-art cabinet" aria-label="Furniture illustration">🪑</div>
                 <div class="product-info">
                     <p class="product-category">FURNITURE</p>
                     <h3>Vintage Wooden Cabinet</h3>
+                    <p class="product-description">Warm wood tones and enduring vintage character.</p>
                     <p class="product-price">$450.00</p>
                     <a href="products.php" class="product-button">Explore Collection</a>
                 </div>
             </article>
 
             <article class="product-card">
-                <img src="assets/images/table-lamp.jpg"
-                     alt="Victorian table lamp">
+                <div class="product-art lamp" aria-label="Lamp illustration">🪔</div>
                 <div class="product-info">
                     <p class="product-category">LIGHTING</p>
                     <h3>Victorian Table Lamp</h3>
+                    <p class="product-description">Create a warm atmosphere with vintage-inspired lighting.</p>
                     <p class="product-price">$180.00</p>
                     <a href="products.php" class="product-button">Explore Collection</a>
                 </div>
             </article>
         </div>
+
+        <div class="collection-action">
+            <a href="products.php" class="primary-button">
+                Explore All Antiques <span aria-hidden="true">→</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="story-section">
+        <div>
+            <p class="eyebrow">MORE THAN OBJECTS</p>
+            <h2>Every Antique Has a Story</h2>
+        </div>
+
+        <p>
+            From timeless decorative pieces to classic furniture and
+            collectibles, our collection celebrates the beauty of the past.
+            Discover unique finds that add warmth, personality, and history
+            to your home.
+        </p>
     </section>
 </main>
 
-<?php require __DIR__ . '/includes/footer.php'; ?>
+<footer class="site-footer">
+    <div class="footer-content">
+        <div>
+            <a href="index.php" class="footer-brand">Antique Store</a>
+            <p>Timeless treasures, carefully collected.</p>
+            <p>Discover pieces that tell a story.</p>
+        </div>
+
+        <div>
+            <h3>Explore</h3>
+            <a href="index.php">Home</a>
+            <a href="products.php">Products</a>
+            <a href="register.php">Create an Account</a>
+        </div>
+
+        <div>
+            <h3>Your Account</h3>
+            <a href="login.php">Login</a>
+            <a href="cart.php">Shopping Cart</a>
+        </div>
+
+        <div>
+            <h3>Contact Us</h3>
+            <p>Email: info@antiquestore.com</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        &copy; <?= date('Y') ?> Antique Store. All rights reserved.
+    </div>
+</footer>
+
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    menuToggle.addEventListener('click', function () {
+        const isOpen = navLinks.classList.toggle('open');
+        menuToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+</script>
+
+</body>
+</html>
