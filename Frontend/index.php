@@ -169,8 +169,8 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
     <div class="footer-content">
         <div>
             <a href="index.php" class="footer-brand">Antique Store</a>
-            <p>Timeless treasures, carefully collected.</p>
-            <p>Discover pieces that tell a story.</p>
+            <p>Celebrating Afghan heritage and craftsmanship.</p>
+            <p>Discover antiques with history and character.</p>
         </div>
 
         <div>
