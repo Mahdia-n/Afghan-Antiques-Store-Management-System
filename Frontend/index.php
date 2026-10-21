@@ -56,33 +56,35 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
 <main>
     <section class="hero">
         <div class="hero-content">
-            <p class="eyebrow">DISCOVER THE BEAUTY OF THE PAST</p>
+            <p class="eyebrow">DISCOVER AFGHAN HERITAGE</p>
 
             <h1>
-                Authentic Antiques<br>
-                <span>for a Timeless Home</span>
+                Afghan Antiques<br>
+                <span>Preserving History & Culture</span>
             </h1>
 
             <p class="hero-description">
-                Explore our curated collection of rare and unique antiques,
-                each with a story to tell. Find distinctive treasures that
-                bring history and character into your home.
+                Explore a collection inspired by Afghanistan's rich cultural
+                heritage, featuring traditional decorative arts, handcrafted
+                objects, vintage furniture, and timeless collectibles.
+                Discover the stories and craftsmanship behind every piece.
             </p>
 
             <a href="products.php" class="primary-button">
-                Purchase Now <span aria-hidden="true">→</span>
+                Explore Collection <span aria-hidden="true">→</span>
             </a>
         </div>
 
-        <p class="hero-note">TIMELESS DESIGN · EXCEPTIONAL CRAFTSMANSHIP</p>
+        <p class="hero-note">AFGHAN HERITAGE · TRADITIONAL CRAFTSMANSHIP · TIMELESS TREASURES</p>
     </section>
 
     <section class="featured-section">
         <div class="section-heading">
             <div class="ornament">✧ ── ❦ ── ✧</div>
-            <p class="eyebrow">HANDPICKED FOR YOU</p>
-            <h2>Featured Antiques</h2>
-            <p>Beautifully crafted pieces, selected for their history and charm.</p>
+            <p class="eyebrow">EXPLORE OUR COLLECTION</p>
+            <h2>Featured Antiques Products</h2>
+            <p>Discover decorative pieces, traditional designs, and vintage 
+                asures inspired by Afghan heritage.</p>
         </div>
 
         <div class="product-grid">
@@ -148,15 +150,17 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
 
     <section class="story-section">
         <div>
-            <p class="eyebrow">MORE THAN OBJECTS</p>
-            <h2>Every Antique Has a Story</h2>
+            <p class="eyebrow">CELEBRATING AFGHAN HERITAGE</p>
+            <h2>Every Piece Tells a Story</h2>
         </div>
 
         <p>
-            From timeless decorative pieces to classic furniture and
-            collectibles, our collection celebrates the beauty of the past.
-            Discover unique finds that add warmth, personality, and history
-            to your home.
+            Afghanistan has a rich tradition of craftsmanship, decorative
+            arts, and cultural exchange. Our Afghan Antique Store Management
+            System helps organize and present antique products, including
+            their descriptions, categories, prices, and availability.
+            Our goal is to make managing and discovering cultural treasures
+            more organized, accessible, and convenient.
         </p>
     </section>
 </main>
