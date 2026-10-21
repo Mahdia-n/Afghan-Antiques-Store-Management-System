@@ -553,3 +553,26 @@
                 grid-template-columns: 1fr;
             }
         }
+ 
+        /* this is the product desing code */
+        
+.empty-products {
+    max-width: 760px;
+    margin: 40px auto 70px;
+    padding: 55px 24px;
+    text-align: center;
+    background: #f7f2e9;
+    border: 1px solid #e5d8c2;
+    border-radius: 10px;
+}
+
+.empty-products h2 {
+    margin: 0 0 14px;
+    color: #493627;
+}
+
+.empty-products p {
+    margin: 0;
+    line-height: 1.8;
+    color: #756655;
+}

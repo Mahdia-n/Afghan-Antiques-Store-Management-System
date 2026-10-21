@@ -173,6 +173,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
             <p>Discover antiques with history and character.</p>
         </div>
 
+        
         <div>
             <h3>Explore</h3>
             <a href="index.php">Home</a>
