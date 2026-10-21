@@ -1,10 +1,12 @@
 
 <?php
 $pageTitle = 'Antique Store | Timeless Treasures';
+
 require __DIR__ . '/includes/header.php';
 ?>
 
 <main>
+    <!-- Hero section -->
     <section class="hero">
         <div class="hero-overlay"></div>
 
@@ -12,7 +14,8 @@ require __DIR__ . '/includes/header.php';
             <p class="eyebrow">DISCOVER THE BEAUTY OF THE PAST</p>
 
             <h1>
-                Authentic Antiques<br>
+                Authentic Antiques
+                <br>
                 <span>for a Timeless Home</span>
             </h1>
 
@@ -31,6 +34,7 @@ require __DIR__ . '/includes/header.php';
         </div>
     </section>
 
+    <!-- Featured products -->
     <section class="featured-section">
         <div class="section-heading">
             <p class="eyebrow">HANDPICKED FOR YOU</p>
@@ -40,15 +44,13 @@ require __DIR__ . '/includes/header.php';
 
         <div class="product-grid">
             <article class="product-card">
-                <div class="product-image product-clock">
-                    <span>Collector's Favorite</span>
-                </div>
+                <div class="product-image product-clock"></div>
                 <div class="product-info">
                     <p class="product-category">TIMEPIECES</p>
                     <h3>Antique Mantel Clock</h3>
                     <p class="product-price">$120.00</p>
                     <a href="products.php" class="product-button">
-                        Explore Product
+                        Explore Collection
                     </a>
                 </div>
             </article>
@@ -60,7 +62,7 @@ require __DIR__ . '/includes/header.php';
                     <h3>Classic Ceramic Vase</h3>
                     <p class="product-price">$95.00</p>
                     <a href="products.php" class="product-button">
-                        Explore Product
+                        Explore Collection
                     </a>
                 </div>
             </article>
@@ -72,7 +74,7 @@ require __DIR__ . '/includes/header.php';
                     <h3>Vintage Wooden Cabinet</h3>
                     <p class="product-price">$450.00</p>
                     <a href="products.php" class="product-button">
-                        Explore Product
+                        Explore Collection
                     </a>
                 </div>
             </article>
@@ -84,7 +86,7 @@ require __DIR__ . '/includes/header.php';
                     <h3>Victorian Table Lamp</h3>
                     <p class="product-price">$180.00</p>
                     <a href="products.php" class="product-button">
-                        Explore Product
+                        Explore Collection
                     </a>
                 </div>
             </article>
@@ -92,20 +94,22 @@ require __DIR__ . '/includes/header.php';
 
         <div class="collection-link">
             <a href="products.php" class="primary-button">
-                Explore the Collection →
+                View All Antiques →
             </a>
         </div>
     </section>
 
+    <!-- Store introduction -->
     <section class="story-section">
         <div>
             <p class="eyebrow">MORE THAN OBJECTS</p>
             <h2>Every Antique Has a Story</h2>
         </div>
+
         <p>
             From beautifully crafted furniture to timeless decorative pieces,
             discover antiques that bring warmth, history, and individuality
-            to your space.
+            to your home.
         </p>
     </section>
 </main>

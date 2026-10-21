@@ -9,8 +9,13 @@ if (session_status() === PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title><?= htmlspecialchars($pageTitle ?? 'Antique Store') ?></title>
+
+    <!-- Link to the shared stylesheet -->
     <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,7 +33,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <button class="menu-toggle" id="menuToggle"
             aria-label="Toggle navigation"
-            aria-expanded="false">☰</button>
+            aria-expanded="false">
+        ☰
+    </button>
 
     <nav class="nav-links" id="navLinks">
         <a href="index.php">Home</a>
@@ -42,7 +49,8 @@ if (session_status() === PHP_SESSION_NONE) {
         <?php endif; ?>
 
         <a href="cart.php" class="cart-link">
-            Cart <span class="cart-count">
+            Cart
+            <span class="cart-count">
                 <?= (int)($_SESSION['cart_count'] ?? 0) ?>
             </span>
         </a>

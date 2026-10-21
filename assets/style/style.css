@@ -509,4 +509,11 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+.hero {
+    background-image: url('../images/headerbackground.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 /* the next file is design for products
