@@ -8,4 +8,3 @@ if (menuToggle && navLinks) {
         menuToggle.setAttribute('aria-expanded', String(isOpen));
     });
 }
-
