@@ -118,6 +118,122 @@ These requirements apply across the customer-facing pages.
 - Use appropriate session management for authentication and shopping cart functionality.
 - Test navigation, form submissions, error handling, cart updates, and responsive
 
+- ## Functional Requirements (FR)
+
+The following functional requirements are based on the 20 prioritized user stories prepared by the Product Owner. They describe what the Afghan Antiques Store Management System should allow customers and administrators to do.
+
+### Customer Account Management
+
+**FR01 – Customer Registration (US01)**  
+The system shall allow customers to create an account by providing their registration information.
+
+**FR02 – Customer Login (US02)**  
+The system shall allow registered customers to log in securely using their credentials.
+
+**FR03 – Customer Logout (US03)**  
+The system shall allow customers to log out of their accounts securely.
+
+### Product Browsing and Shopping
+
+**FR04 – Browse Products (US04)**  
+The system shall allow customers to browse available Afghan antique products.
+
+**FR05 – View Product Details (US05)**  
+The system shall display product photos, descriptions, and prices so customers can review items before purchasing.
+
+**FR06 – Search Products (US06)**  
+The system shall allow customers to search for antique products by name.
+
+**FR07 – Add Products to Cart (US07)**  
+The system shall allow customers to add products to their shopping cart.
+
+**FR08 – Manage Shopping Cart (US08)**  
+The system shall allow customers to change product quantities or remove items from their shopping cart.
+
+### Orders and Delivery
+
+**FR09 – Submit Orders (US09)**  
+The system shall allow customers to submit orders and receive confirmation that their order request was received.
+
+**FR10 – Delivery Address (US10)**  
+The system shall allow customers to provide a delivery address for their orders.
+
+### Product and Order Administration
+
+**FR11 – Update Product Details (US11)**  
+The system shall allow store administrators to update product information.
+
+**FR12 – Remove Products (US12)**  
+The system shall allow store administrators to remove products that are no longer available for sale.
+
+**FR13 – Update Order Status (US13)**  
+The system shall allow store administrators to update the progress or status of customer orders.
+
+**FR14 – View Order History (US14)**  
+The system shall allow customers to view their previous orders.
+
+**FR15 – Manage Payment Status (US15)**  
+The system shall allow store administrators to mark orders as paid or unpaid.
+
+**FR16 – View Customer Information (US16)**  
+The system shall allow authorized store administrators to view customer information needed for order management.
+
+### Additional Store Features
+
+**FR17 – View Sales Summary (US17)**  
+The system shall allow store administrators to view a summary of store sales.
+
+**FR18 – Request Product Returns (US18)**  
+The system shall allow customers to request a product return according to the store's return policy.
+
+**FR19 – Wishlist (US19)**  
+The system shall allow customers to save favorite products to a wishlist for future reference.
+
+**FR20 – Special Offers (US20)**  
+The system shall allow store administrators to create special offers for selected products.
+
+---
+
+## Non-Functional Requirements (NFR)
+
+The following are proposed quality requirements for the Afghan Antiques Store Management System. They describe how the website should operate. The development team will review and confirm these requirements before final approval.
+
+**NFR01 – Security**  
+The system shall protect customer information. Passwords shall be stored using secure password hashing, and database queries shall use prepared statements.
+
+**NFR02 – Usability**  
+The website shall have a simple, understandable interface so customers can easily navigate pages, find products, and use the shopping cart.
+
+**NFR03 – Performance**  
+The website should load pages and respond to normal user actions without unnecessary delays. The development team will agree on measurable performance targets.
+
+**NFR04 – Browser Compatibility**  
+The website should work correctly on commonly used modern web browsers, such as Google Chrome, Firefox, and Safari.
+
+**NFR05 – Responsive Design**  
+The website shall adjust its layout to support desktop computers, tablets, and mobile phones.
+
+**NFR06 – Reliability**  
+The system shall handle invalid inputs and common errors appropriately without unnecessarily losing customer information or order data.
+
+**NFR07 – Data Integrity**  
+The system shall validate important information and maintain accurate customer, product, and order records in the MySQL database.
+
+**NFR08 – Maintainability**  
+The application code shall be organized and understandable so team members can fix problems and add features more easily.
+
+---
+
+## Requirements Review
+
+**Prepared by:** Khadija Khalil – Product Owner
+
+**Technical Reviewer:** Shokrya Barak Insaf – Backend Developer
+
+**Status:** Draft – Awaiting Team Review
+
+**Note:** These requirements describe the planned system. They do not mean that all features have already been developed. The team will review the requirements and confirm implementation priorities according to the Product Backlog and Sprint Backlogs.
+
 # Created by: 
 # Zohra Khwaja 
 # Shokrya Barak Insaf
