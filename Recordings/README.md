@@ -8,5 +8,6 @@ First Sprint planing: https://drive.google.com/file/d/10-Su-wwZ8IIm54MYVd_7IgFwa
 
 Sprint 1 Progress Meeting: https://drive.google.com/file/d/1-etJ_G0A0Bx5VCQw4IghdL_iUZusSK6j/view?usp=sharing
 
+Sprint 1 Review + Retrospective: https://drive.google.com/file/d/1oBZR90pSGjXv1UgNDRf_zdwltIfgunkO/view?usp=sharing
 
 
