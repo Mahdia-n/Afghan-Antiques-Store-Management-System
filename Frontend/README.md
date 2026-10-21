@@ -57,5 +57,5 @@ Use PHP sessions to keep customers logged in.
 Test registration, login, invalid credentials, and duplicate emails.
 
 
-
-
+### Created By: Zohra Khwaja & Shokrya Barak Insaf
+        
