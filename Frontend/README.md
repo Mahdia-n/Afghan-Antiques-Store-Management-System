@@ -6,31 +6,45 @@ Customer management backend: A database and backend code to register customers, 
 Later, you can add inventory management, order tracking, payment integration, and an admin dashboard.
 
 Website initial pages to develop in the first stage:
-Page 1 — Home (index.php)
-Business name and logo
-Navigation menu
-Welcome section
-“Purchase Now” button
-Featured products
-Footer with contact information
-Page 2 — Product Catalog (products.php)
-Display available products
-Show product names, prices, and images
-Add to Cart button
-View Cart button
-Page 3 — Customer Registration (register.php)
-Full name
-Email address
-Password and confirm password
-Form validation
-Link to existing customer login
-Page 4 — Shopping Cart (cart.php)
-Selected items
-Quantity controls
-Remove item option
-Subtotal and total
-Proceed to Checkout button
 
+### Page 1 — Home (index.php)
+- Business name and logo.
+- Navigation menu.
+- Welcome section introducing the antique store.
+- “Purchase Now” button linking to products.php.
+- Featured antique products.
+- Footer with contact information.
+
+### Page 2 — Product Catalog (products.php)
+- Display available antique products.
+- Show product names, images, descriptions, and prices.
+- Include product categories and search functionality.
+- Provide Add to Cart and View Cart buttons.
+- Use a responsive layout.
+
+### Page 3 — Customer Registration (register.php)
+- Collect the customer's full name, email address, password, and password confirmation.
+- Validate required fields and email format.
+- Check whether the email is already registered.
+- Hash passwords using PHP's password_hash().
+- Store customer records in MySQL using prepared statements.
+- Display appropriate success and error messages.
+- Include a link to the login page.
+
+### Page 4 — Shopping Cart (cart.php)
+- Display selected products, prices, and quantities.
+- Allow customers to update quantities and remove items.
+- Calculate the subtotal and total.
+- Display an appropriate message when the cart is empty.
+- Include a “Continue Shopping” button.
+- Provide a “Proceed to Checkout” button.
+
+### Customer Authentication
+- Create login and logout functionality.
+- Authenticate customers securely using password_verify().
+- Use PHP sessions to maintain login status.
+- Validate user input on the server.
+- Test registration, successful login, invalid credentials, duplicate emails, and logout.
 Things to Do:
 Design the customer registration form.
 Collect the customer's name, email, and password.
