@@ -30,5 +30,6 @@
         &copy; <?= date('Y') ?> Antique Store. All rights reserved.
     </div>
 </footer>
+<script src="assets/js/script.js"></script>
 </body>
 </html>
