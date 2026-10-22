@@ -44,7 +44,6 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
             <a href="logout.php">Logout</a>
         <?php else: ?>
             <a href="login.php">Login</a>
-            <a href="register.php" class="signup-button">Sign Up</a>
         <?php endif; ?>
 
         <a href="cart.php" class="cart-link">
