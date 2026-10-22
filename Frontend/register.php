@@ -124,16 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Already have an account?
             <a href="login.php">Log in</a>
         </p>
-
-        <p class="auth-demo-note">
-            Preview mode — registration will be activated after database setup.
-        </p>
     </section>
 </main>
-
-<footer class="auth-footer">
-    <p>&copy; <?= date('Y') ?> Afghan Antiques. All rights reserved.</p>
-</footer>
 
 </body>
 </html>
