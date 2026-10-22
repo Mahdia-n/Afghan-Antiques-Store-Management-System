@@ -1,211 +1,158 @@
 <?php
 session_start();
 
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
+$products = [
+    1 => [
+        'name' => 'Afghan Antique Mantel Clock',
+        'category' => 'Home Decor',
+        'description' => 'A timeless decorative clock inspired by traditional craftsmanship. This distinctive piece brings vintage character and warmth to your home.',
+        'price' => 185.00,
+        'quantity' => 4,
+        'image' => 'assets/images/antique-mantel-clock.png'
+    ],
+    2 => [
+        'name' => 'Traditional Ceramic Vase',
+        'category' => 'Pottery',
+        'description' => 'A beautiful ceramic piece inspired by Afghan artistic heritage. Display it as a centerpiece or as part of your antique collection.',
+        'price' => 95.00,
+        'quantity' => 6,
+        'image' => 'assets/images/ceramic-vase.png'
+    ],
+    3 => [
+        'name' => 'Vintage Wooden Cabinet',
+        'category' => 'Furniture',
+        'description' => 'A vintage-inspired wooden cabinet with a warm, traditional appearance, ideal for adding character to your living space.',
+        'price' => 450.00,
+        'quantity' => 2,
+        'image' => 'assets/images/vintage-wooden-cabinet.png'
+    ],
+    4 => [
+        'name' => 'Victorian Table Lamp',
+        'category' => 'Lighting',
+        'description' => 'An elegant vintage-style table lamp that adds timeless charm and a classic atmosphere to your interior.',
+        'price' => 125.00,
+        'quantity' => 3,
+        'image' => 'assets/images/victorian-table-lamp.png'
+    ]
+];
 
-$pageTitle = 'Our Collection | Afghan Antique Store';
-$products = [];
-$categories = [];
-$dbError = false;
-
-$search = trim($_GET['search'] ?? '');
-$category = trim($_GET['category'] ?? '');
-
-function e($value): string {
-    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
-
-try {
-    require_once __DIR__ . '/config/database.php';
-
-    $categories = $pdo->query(
-        "SELECT DISTINCT category
-         FROM inventory
-         WHERE category IS NOT NULL AND category <> ''
-         ORDER BY category"
-    )->fetchAll(PDO::FETCH_COLUMN);
-
-    $sql = "SELECT product_id, product_name, description,
-                   category, price, quantity, image
-            FROM inventory
-            WHERE 1=1";
-
-    $params = [];
-
-    if ($search !== '') {
-        $sql .= " AND (product_name LIKE :search
-                       OR description LIKE :search)";
-        $params['search'] = "%$search%";
-    }
-
-    if ($category !== '') {
-        $sql .= " AND category = :category";
-        $params['category'] = $category;
-    }
-
-    $sql .= " ORDER BY product_name ASC";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $products = $stmt->fetchAll();
-
-} catch (Throwable $ex) {
-    error_log($ex->getMessage());
-    $dbError = true;
-}
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$product = ($id !== false && $id !== null)
+    ? ($products[$id] ?? null)
+    : null;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($pageTitle) ?></title>
+    <title>
+        <?= $product
+            ? htmlspecialchars($product['name']) . ' | Afghan Antiques'
+            : 'Product Not Found | Afghan Antiques' ?>
+    </title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-<header class="site-header">
-    <a href="index.php" class="brand">
-        <span class="brand-mark">A</span>
-        <span>
-            <span class="brand-name">Afghan Antique Store</span>
-            <span class="brand-tagline">HERITAGE & CRAFTSMANSHIP</span>
-        </span>
-    </a>
-
-    <nav class="nav-links">
+<header>
+    <nav>
         <a href="index.php">Home</a>
         <a href="products.php">Products</a>
-
-        <?php if (isset($_SESSION['customer_id'])): ?>
-            <a href="logout.php">Logout</a>
-        <?php else: ?>
-            <a href="login.php">Login</a>
-            <a href="register.php" class="signup-button">Sign Up</a>
-        <?php endif; ?>
-
-        <a href="cart.php" class="cart-link">Cart</a>
+        <a href="about.php">About Us</a>
+        <a href="cart.php">Cart</a>
+        <a href="login.php">Login</a>
     </nav>
 </header>
 
-<main class="products-page">
+<main class="product-details-page">
+    <?php if ($product): ?>
 
-    <section class="section-heading">
-        <p class="eyebrow">EXPLORE OUR COLLECTION</p>
-        <h1>Afghan Antiques & Treasures</h1>
-        <p>
-            Discover distinctive antiques, traditional craftsmanship,
-            and treasures inspired by Afghan heritage.
-        </p>
-    </section>
+        <a class="back-link" href="products.php">&larr; Back to Collection</a>
 
-    <form method="GET" action="products.php" class="product-filters">
-        <input
-            type="search"
-            name="search"
-            placeholder="Search antiques..."
-            value="<?= e($search) ?>"
-        >
-
-        <select name="category">
-            <option value="">All Categories</option>
-
-            <?php foreach ($categories as $item): ?>
-                <option
-                    value="<?= e($item) ?>"
-                    <?= $category === $item ? 'selected' : '' ?>
+        <section class="product-details">
+            <div class="product-details-image">
+                <img
+                    src="<?= htmlspecialchars($product['image']) ?>"
+                    alt="<?= htmlspecialchars($product['name']) ?>"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 >
-                    <?= e($item) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+                <div class="image-placeholder" style="display:none;">
+                    Product image unavailable
+                </div>
+            </div>
 
-        <button type="submit" class="primary-button">Search</button>
-        <a href="products.php" class="product-button">Clear</a>
-    </form>
+            <div class="product-details-info">
+                <p class="product-category">
+                    <?= htmlspecialchars($product['category']) ?>
+                </p>
 
-    <?php if ($dbError): ?>
+                <h1><?= htmlspecialchars($product['name']) ?></h1>
 
-        <div class="empty-products">
-            <h2>Products are temporarily unavailable</h2>
-            <p>We couldn't load the inventory. Please try again later.</p>
-        </div>
+                <p class="details-price">
+                    $<?= number_format($product['price'], 2) ?>
+                </p>
 
-    <?php elseif (empty($products)): ?>
+                <p class="details-description">
+                    <?= htmlspecialchars($product['description']) ?>
+                </p>
 
-        <div class="empty-products">
-            <h2>No Products to Show Right Now</h2>
-            <p>
-                Our antique collection will appear here when products
-                are added to the inventory. Please check back soon.
-            </p>
-        </div>
+                <p class="stock-status">
+                    <?= $product['quantity'] > 0
+                        ? 'Available in our collection'
+                        : 'Currently unavailable' ?>
+                </p>
+
+                <form action="cart.php" method="post" class="add-to-cart-form">
+                    <input
+                        type="hidden"
+                        name="product_id"
+                        value="<?= (int) $id ?>"
+                    >
+
+                    <label for="quantity">Quantity</label>
+
+                    <input
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        value="1"
+                        min="1"
+                        max="<?= (int) $product['quantity'] ?>"
+                        required
+                        <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
+                    >
+
+                    <button
+                        type="submit"
+                        name="add_to_cart"
+                        value="1"
+                        <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
+                    >
+                        Add to Cart
+                    </button>
+                </form>
+
+                <p class="demo-note">
+                    Preview mode: product information is temporary sample data.
+                </p>
+            </div>
+        </section>
 
     <?php else: ?>
 
-        <p class="results-count">
-            <?= count($products) ?> product(s) found
-        </p>
-
-        <div class="product-grid">
-            <?php foreach ($products as $product): ?>
-                <article class="product-card">
-
-                    <div class="product-art">
-                        <?php if (!empty($product['image'])): ?>
-                            <img
-                                src="assets/images/<?= rawurlencode(basename($product['image'])) ?>"
-                                alt="<?= e($product['product_name']) ?>"
-                            >
-                        <?php else: ?>
-                            <div class="no-product-image">
-                                Image unavailable
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="product-info">
-                        <p class="product-category">
-                            <?= e($product['category']) ?>
-                        </p>
-
-                        <h2><?= e($product['product_name']) ?></h2>
-
-                        <p class="product-description">
-                            <?= e($product['description']) ?>
-                        </p>
-
-                        <p class="product-price">
-                            $<?= number_format((float)$product['price'], 2) ?>
-                        </p>
-
-                        <p class="stock-status <?= (int)$product['quantity'] < 1 ? 'out-of-stock' : '' ?>">
-                            <?= (int)$product['quantity'] > 0
-                                ? 'In stock'
-                                : 'Out of stock' ?>
-                        </p>
-
-                        <a
-                            href="product.php?id=<?= (int)$product['product_id'] ?>"
-                            class="product-button"
-                        >
-                            View Details
-                        </a>
-                    </div>
-
-                </article>
-            <?php endforeach; ?>
-        </div>
+        <section class="product-not-found">
+            <h1>Product Not Found</h1>
+            <p>This product does not exist in our current preview collection.</p>
+            <a class="product-button" href="products.php">Browse Products</a>
+        </section>
 
     <?php endif; ?>
-
 </main>
 
-<footer class="site-footer">
-    <div class="footer-bottom">
-        &copy; <?= date('Y') ?> Afghan Antique Store. All rights reserved.
-    </div>
+<footer>
+    <p>&copy; <?= date('Y') ?> Afghan Antiques. All rights reserved.</p>
 </footer>
 
 </body>

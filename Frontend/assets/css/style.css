@@ -576,3 +576,130 @@
     line-height: 1.8;
     color: #756655;
 }
+
+
+
+/* Product details page */
+.product-details-page {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 45px 24px 70px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 28px;
+    color: #60462f;
+    text-decoration: none;
+}
+
+.product-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 55px;
+    align-items: start;
+}
+
+.product-details-image {
+    min-height: 420px;
+    background: #f6f2eb;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+}
+
+.product-details-image img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+}
+
+.product-details-info {
+    padding-top: 15px;
+}
+
+.product-details-info h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.2;
+    margin: 12px 0 20px;
+}
+
+.details-price {
+    font-size: 27px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.details-description {
+    line-height: 1.8;
+    color: #625b53;
+}
+
+.stock-status {
+    margin: 22px 0;
+    font-weight: 600;
+}
+
+.add-to-cart-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.add-to-cart-form label {
+    width: 100%;
+    font-weight: 600;
+}
+
+.add-to-cart-form input {
+    width: 85px;
+    padding: 12px;
+    border: 1px solid #d8d0c3;
+    border-radius: 4px;
+    font: inherit;
+}
+
+.add-to-cart-form button {
+    padding: 13px 22px;
+    border: none;
+    border-radius: 4px;
+    background: #60462f;
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+.add-to-cart-form button:hover {
+    background: #453221;
+}
+
+.add-to-cart-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.demo-note {
+    margin-top: 25px;
+    font-size: 13px;
+    color: #777;
+}
+
+.product-not-found {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+@media (max-width: 750px) {
+    .product-details {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .product-details-image {
+        min-height: 300px;
+    }
+}
