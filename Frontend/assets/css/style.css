@@ -553,6 +553,21 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* Sign Up navigation link */
+        .signup-link {
+            display: inline-block;
+            padding: 9px 16px;
+            border-radius: 5px;
+            background: #60462f;
+            color: #fff !important;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+.signup-link:hover {
+    background: #453221;
+}
+
  
         /* this is the product desing code */
         
@@ -701,5 +716,194 @@
 
     .product-details-image {
         min-height: 300px;
+    }
+}
+
+
+
+/* Authentication pages: Sign Up and Login */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f7f3ed;
+    color: #342a21;
+}
+
+.auth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 6%;
+    background: #fff;
+    border-bottom: 1px solid #e8e0d5;
+}
+
+.auth-brand {
+    color: #60462f;
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.auth-back {
+    color: #60462f;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.auth-back:hover,
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+.auth-container {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 45px 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 38px;
+    background: #fff;
+    border: 1px solid #e9e0d5;
+    border-radius: 10px;
+    box-shadow: 0 12px 35px rgba(57, 42, 26, 0.07);
+}
+
+.auth-eyebrow {
+    color: #8b6b47;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.auth-card h1 {
+    margin: 12px 0;
+    font-size: 30px;
+    line-height: 1.25;
+}
+
+.auth-subtitle {
+    margin-bottom: 26px;
+    color: #756b60;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-form label {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.auth-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #d9cfc1;
+    border-radius: 5px;
+    background: #fff;
+    color: #342a21;
+    font: inherit;
+    font-size: 14px;
+}
+
+.auth-form input:focus {
+    outline: 2px solid #a68a6a;
+    outline-offset: 1px;
+}
+
+.auth-submit {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border: none;
+    border-radius: 5px;
+    background: #60462f;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-submit:hover {
+    background: #453221;
+}
+
+.auth-switch {
+    margin-top: 23px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-switch a {
+    color: #60462f;
+    font-weight: 600;
+}
+
+.auth-message {
+    margin: 18px 0;
+    padding: 12px 14px;
+    border: 1px solid #e4c7a7;
+    border-radius: 5px;
+    background: #fbf2e7;
+    color: #70451f;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.auth-message p {
+    margin: 4px 0;
+}
+
+.auth-demo-note {
+    margin-top: 22px;
+    color: #81776c;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.auth-footer {
+    padding: 18px 20px;
+    border-top: 1px solid #e8e0d5;
+    background: #fff;
+    color: #756b60;
+    text-align: center;
+    font-size: 13px;
+}
+
+.auth-footer p {
+    margin: 0;
+}
+
+@media (max-width: 500px) {
+    .auth-header {
+        padding: 18px;
+    }
+
+    .auth-brand {
+        font-size: 18px;
+    }
+
+    .auth-card {
+        padding: 25px 20px;
+    }
+
+    .auth-card h1 {
+        font-size: 26px;
     }
 }

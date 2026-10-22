@@ -50,6 +50,9 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
         <a href="cart.php" class="cart-link">
             Cart <span class="cart-count"><?= $cartCount ?></span>
         </a>
+        <a href="register.php" class="signup-link">
+            Sign Up
+        </a>
     </nav>
 </header>
 
