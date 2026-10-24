@@ -69,7 +69,7 @@ The product catalog (US04) was not yet confirmed as fully completed.
 
 For the complete meeting results, feedback, and lessons learned, see the separate `2026-10-21-Sprint 1 Review + Retrospective.md` file in this folder.
 
-**Sprint 1 Final Status:** Customer account features and home page successfully tested. Product catalog completion still needs confirmation.
+**Sprint 1 Final Status:** Customer account features and home page successfully tested. Product catalog completion still needs confirmation. 
 
 
 
