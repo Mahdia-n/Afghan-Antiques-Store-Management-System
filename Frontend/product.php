@@ -105,6 +105,7 @@ $product = ($id !== false && $id !== null)
                 </p>
 
                 <form action="cart.php" method="post" class="add-to-cart-form">
+                    <input type="hidden" name="action" value="add">
                     <input
                         type="hidden"
                         name="product_id"
