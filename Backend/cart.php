@@ -120,5 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <?php endif; ?>
 
     <p><a href="products.php">Continue Shopping</a></p>
+    <a href="checkout.php" class="btn">Checkout</a>
 </body>
 </html>
