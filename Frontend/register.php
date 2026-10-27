@@ -1,9 +1,21 @@
 <?php
 session_start();
+<<<<<<< HEAD
+
+$redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
+
+$allowedRedirects = ['index.php', 'checkout.php'];
+
+if (!in_array($redirect, $allowedRedirects, true)) {
+    $redirect = 'index.php';
+}
+
+require_once __DIR__ . '/config/database.php';
+=======
 require_once __DIR__ . '/db.php';
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
 
 $errors = [];
-$success = '';
 $name = '';
 $email = '';
 
@@ -18,11 +30,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmPassword = $_POST['confirm_password'] ?? '';
     $csrfToken = $_POST['csrf_token'] ?? '';
 
+<<<<<<< HEAD
+    // Validate CSRF token.
+    if (
+        !is_string($csrfToken) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        $errors[] = 'Your session expired. Please refresh the page and try again.';
+    }
+
+    // Validate name.
+=======
     if (!is_string($csrfToken) ||
         !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
         $errors[] = 'Your session expired. Please refresh the page and try again.';
     }
 
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
     if ($name === '') {
         $errors[] = 'Please enter your full name.';
     } elseif (strlen($name) > 100) {
@@ -43,6 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Your passwords do not match.';
     }
 
+<<<<<<< HEAD
+    // Register customer.
+=======
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
     if (empty($errors)) {
         try {
             $check = $pdo->prepare(
@@ -67,15 +95,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'Customer'
                 ]);
 
+<<<<<<< HEAD
+                // Refresh the CSRF token and preserve the destination.
+=======
                 $success = 'Your account has been created successfully! You can now log in.';
                 $name = '';
                 $email = '';
 
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+                // Send the newly registered customer to login.
+                header(
+                    'Location: login.php?redirect=' . urlencode($redirect)
+                );
+                exit;
             }
         } catch (PDOException $e) {
             error_log('Registration error: ' . $e->getMessage());
+<<<<<<< HEAD
+
+            if ($e->getCode() === '23000') {
+                $errors[] = 'This email address may already be registered. Please log in.';
+            } else {
+                $errors[] = 'We could not create your account right now. Please try again later.';
+            }
+=======
             $errors[] = 'We could not create your account right now. Please try again later.';
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
         }
     }
 }
@@ -103,13 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Create an account to enjoy a more personal shopping experience.
         </p>
 
-        <?php if ($success !== ''): ?>
-            <div class="auth-message" role="status">
-                <p><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p>
-                <p><a href="login.php">Log in to your account</a></p>
-            </div>
-        <?php endif; ?>
-
         <?php if (!empty($errors)): ?>
             <div class="auth-message" role="alert">
                 <?php foreach ($errors as $error): ?>
@@ -119,6 +159,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" action="register.php" class="auth-form">
+            <input
+                type="hidden"
+                name="redirect"
+                value="<?= htmlspecialchars($redirect, ENT_QUOTES, 'UTF-8') ?>"
+            >
+
             <input
                 type="hidden"
                 name="csrf_token"
@@ -178,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <p class="auth-switch">
             Already have an account?
-            <a href="login.php">Log in</a>
+            <a href="login.php?redirect=<?= urlencode($redirect) ?>">Log in</a>
         </p>
     </section>
 </main>

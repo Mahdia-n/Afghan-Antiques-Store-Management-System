@@ -227,9 +227,16 @@ function escapeHtml($value) {
                     before payment.
                 </p>
 
-                <a href="checkout.php" class="cart-primary-button cart-checkout-button">
-                    Proceed to Checkout →
-                </a>
+                <?php
+                $checkoutUrl = isset($_SESSION['user_id'])
+                ? 'checkout.php'
+                : 'register.php?redirect=checkout.php';
+                ?>
+
+<a href="<?= escapeHtml($checkoutUrl) ?>"
+   class="cart-primary-button cart-checkout-button">
+    Proceed to Checkout →
+</a>
 
                 <div class="cart-security">
                     <span>✓</span>
