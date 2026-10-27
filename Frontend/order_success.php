@@ -47,7 +47,7 @@ $orderTotal = (float) $_SESSION['last_order_total'];
                 <strong>Order total:</strong>
                 $<?= number_format($orderTotal, 2) ?>
             </p>
-            <p>Your order status is pending. Payment has not been processed.</p>
+            <p>THANK YOU FOR YOUR SHOPPING!</p>
         </div>
 
         <a href="products.php" class="auth-submit"

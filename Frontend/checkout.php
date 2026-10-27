@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php?redirect=checkout.php');
     exit;
@@ -49,9 +53,11 @@ foreach ($cart as $id => $qty) {
 }
 
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $error = 'The checkout form is ready, but order submission has not been connected yet.';
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+$error = $_SESSION['checkout_error'] ?? '';
+unset($_SESSION['checkout_error']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -102,7 +108,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <h3>Subtotal: $<?= number_format($subtotal, 2) ?></h3>
 
-            <form method="POST" class="auth-form">
+            <form method="POST" action="place_order.php" class="auth-form">
+                <input type="hidden" name="csrf_token"
+                    value="<?= e($_SESSION['csrf_token']) ?>">
+
                 <label for="phone">Phone number</label>
                 <input id="phone" type="tel" name="phone" required>
 
@@ -112,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="city">City</label>
                 <input id="city" type="text" name="shipping_city" required>
 
-                <label for="state">State</label>
+                <label for="state">State</label>    
                 <input id="state" type="text" name="shipping_state">
 
                 <label for="postal">ZIP / Postal code</label>
