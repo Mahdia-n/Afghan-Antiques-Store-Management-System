@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'afghan_antique_store';
+$dbname = 'afghan_antique_db';
 $username = 'root';
 $password = '';
 
@@ -16,7 +16,6 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('Database connection failed. Please check your configuration.');
+    error_log('Database connection error: ' . $e->getMessage());
+    throw $e;
 }
-?>
