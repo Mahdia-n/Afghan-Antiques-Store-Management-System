@@ -1,36 +1,42 @@
-# Progress Meeting Record
+# Sprint 2 Progress Meeting Record
 
-**Project:** Afghan ANtiques Store Management System 
-**Sprint:** 2 
+**Project:** Afghan Antiques Store Management System  
+**Sprint:** 2  
 **Date:** October 24, 2026  
-**Time:** 8 am +4:30  
-**Facilitator:** Scrum Master  
+**Product Owner:** Khadija Khalil  
+**Scrum Master:** Mahdia Noori
 
+## 1. Meeting Attendance
 
-## 1. Completed Work
- Developer 1  [completed work]
- Developer 2  [completed work]
+- Product Owner: Khadija Khalil – Present
+- Scrum Master: Mahdia Noori – Present
+- Frontend Developer: Zohra Khawaja – Absent
+- Backend Developer: Shokrya Barak Insaf – Absent
 
-## 2. Blockers and Impediments
- [Actual issue] 
- [Impact] 
- [Action] 
-OR  "No blockers reported."
+## 2. Development Progress
 
-## 3. Next Tasks
+Both developers were absent from the meeting. Therefore, no Sprint 2 development work was demonstrated or tested.
 
+The progress of the selected user stories (US04, US05, US06, US10, US11, and US19) could not be verified.
+
+## 3. Challenges
+
+- The developers were not available to provide progress updates.
+- The team could not confirm which features had been completed.
+- The Product Owner could not review or accept any new Sprint 2 features.
 
 ## 4. Sprint Backlog Changes
 
-- Tasks completed:
-- Tasks added or clarified:
-- Tasks removed or rescheduled:
-- Reason for each change:
-- Person(s) consulted:
+- No changes to the selected user stories were confirmed.
+- Development and testing statuses remain unverified.
 
-OR "No sprint backlog changes."
+## 5. Decisions and Next Steps
 
-## 5. Decisions and Follow-up
+- Request updates from both developers.
+- Ask developers to upload their work to GitHub.
+- Review and test completed features at the next meeting.
+- Update the Sprint 2 Backlog after progress is confirmed.
 
-- Decisions made:
-- Follow-up actions:
+**Overall Status:** Sprint 2 is underway, but no new development progress was verified during the October 24 meeting.
+
+**Documented by:** Khadija Khalil – Product Owner

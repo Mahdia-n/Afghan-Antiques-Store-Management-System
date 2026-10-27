@@ -49,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Login</title>
 </head>
 <body>
-
     <h1>Login</h1>
 
     <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
@@ -69,6 +68,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <p>Don't have an account?
         <a href="register.php">Register here</a>
     </p>
-
 </body>
 </html>

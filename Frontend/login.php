@@ -1,17 +1,44 @@
 <?php
 session_start();
+require_once __DIR__ . "/db.php";
 
-$error = '';
-$email = '';
+$error = "";
+$email = "";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = strtolower(trim($_POST['email'] ?? ''));
-    $password = $_POST['password'] ?? '';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $email = strtolower(trim($_POST["email"] ?? ""));
+    $password = $_POST["password"] ?? "";
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
-        $error = 'Please enter a valid email address and password.';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === "") {
+        $error = "Please enter a valid email address and password.";
     } else {
-        $error = 'Login will be enabled after the database is connected and registered accounts can be verified.';
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT id, full_name, email, password, role
+                 FROM Users
+                 WHERE email = ?
+                 LIMIT 1"
+            );
+
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user["password"])) {
+                session_regenerate_id(true);
+
+                $_SESSION["customer_id"] = $user["id"];
+                $_SESSION["customer_name"] = $user["full_name"];
+                $_SESSION["customer_role"] = $user["role"];
+
+                header("Location: dashboard.php");
+                exit;
+            }
+
+            $error = "Invalid email address or password.";
+        } catch (PDOException $e) {
+            error_log("Login error: " . $e->getMessage());
+            $error = "We could not log you in right now. Please try again later.";
+        }
     }
 }
 ?>
@@ -40,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if ($error !== ''): ?>
             <div class="auth-message" role="alert">
-                <?= htmlspecialchars($error) ?>
+                <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
             </div>
         <?php endif; ?>
 
@@ -50,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 type="email"
                 id="email"
                 name="email"
-                value="<?= htmlspecialchars($email) ?>"
+                value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>"
+                maxlength="255"
                 autocomplete="email"
                 placeholder="you@example.com"
                 required
@@ -75,7 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </p>
     </section>
 </main>
-
 
 </body>
 </html>

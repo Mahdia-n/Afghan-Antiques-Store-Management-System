@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         try {
             $check = $pdo->prepare(
-                "SELECT Id FROM Users WHERE Email = ?"
+                "SELECT id FROM Users WHERE email = ?"
             );
             $check->execute([$email]);
 
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 $stmt = $pdo->prepare(
                     "INSERT INTO Users
-                    (full_name, Email, Password, Role)
+                    (full_name, email, password, role)
                     VALUES (?, ?, ?, ?)"
                 );
 
@@ -45,7 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $message = "Registration successful! You can now log in.";
             }
         } catch (PDOException $e) {
-            $message = "Database error: " . $e->getMessage();
+            error_log($e->getMessage());
+            $message = "Something went wrong. Please check the database settings.";
         }
     }
 }
@@ -59,7 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Create Account</title>
 </head>
 <body>
-
     <h1>Create Account</h1>
 
     <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
@@ -84,6 +84,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <p>Already have an account?
         <a href="login.php">Login here</a>
     </p>
-
 </body>
 </html>
