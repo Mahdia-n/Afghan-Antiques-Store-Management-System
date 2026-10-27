@@ -1,30 +1,48 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-?>
-
-<?php
 session_start();
 
+require_once __DIR__ . '/config/database.php';
+
 $errors = [];
+$success = '';
 $name = '';
 $email = '';
+
+// Create a CSRF token for secure form submission.
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
+    $csrfToken = $_POST['csrf_token'] ?? '';
 
+    // Validate form security token.
+    if (
+        !is_string($csrfToken) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        $errors[] = 'Your session expired. Please refresh the page and try again.';
+    }
+
+    // Validate full name.
     if ($name === '') {
         $errors[] = 'Please enter your full name.';
+    } elseif (strlen($name) > 150) {
+        $errors[] = 'Your name must not exceed 150 characters.';
     }
 
+    // Validate email.
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Please enter a valid email address.';
+    } elseif (strlen($email) > 255) {
+        $errors[] = 'Your email address is too long.';
     }
 
+    // Validate password.
     if (strlen($password) < 8) {
         $errors[] = 'Your password must be at least 8 characters.';
     }
@@ -33,9 +51,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Your passwords do not match.';
     }
 
-    // Temporary frontend demo only: no account is saved.
-    if (!$errors) {
-        $errors[] = 'The registration form is working, but account creation will be enabled after database configuration.';
+    // Save the new customer if validation passes.
+    if (empty($errors)) {
+        try {
+            // Check whether this email already exists.
+            $check = $pdo->prepare(
+                'SELECT user_id FROM users WHERE email = :email LIMIT 1'
+            );
+            $check->execute(['email' => $email]);
+
+            if ($check->fetch()) {
+                $errors[] = 'This email address is already registered. Please log in.';
+            } else {
+                // Hash the password before saving it.
+                $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+                $insert = $pdo->prepare(
+                    'INSERT INTO users (full_name, email, password_hash)
+                     VALUES (:full_name, :email, :password_hash)'
+                );
+
+                $insert->execute([
+                    'full_name' => $name,
+                    'email' => $email,
+                    'password_hash' => $passwordHash
+                ]);
+
+                $success = 'Your account has been created successfully! You can now log in.';
+
+                // Clear the form after successful registration.
+                $name = '';
+                $email = '';
+
+                // Rotate the form token.
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
+        } catch (PDOException $e) {
+            // Log technical details without displaying them to customers.
+            error_log('Registration error: ' . $e->getMessage());
+
+            if ($e->getCode() === '23000') {
+                $errors[] = 'This email address may already be registered. Please try logging in.';
+            } else {
+                $errors[] = 'We could not create your account right now. Please try again later.';
+            }
+        }
     }
 }
 ?>
@@ -62,21 +122,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Create an account to enjoy a more personal shopping experience.
         </p>
 
-        <?php if ($errors): ?>
+        <?php if ($success !== ''): ?>
+            <div class="auth-message" role="status">
+                <p><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p>
+                <p><a href="login.php">Log in to your account</a></p>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($errors)): ?>
             <div class="auth-message" role="alert">
                 <?php foreach ($errors as $error): ?>
-                    <p><?= htmlspecialchars($error) ?></p>
+                    <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
 
         <form method="post" action="register.php" class="auth-form">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+            >
+
             <label for="name">Full name</label>
             <input
                 type="text"
                 id="name"
                 name="name"
-                value="<?= htmlspecialchars($name) ?>"
+                value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"
+                maxlength="150"
                 autocomplete="name"
                 placeholder="Enter your full name"
                 required
@@ -87,7 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 type="email"
                 id="email"
                 name="email"
-                value="<?= htmlspecialchars($email) ?>"
+                value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>"
+                maxlength="255"
                 autocomplete="email"
                 placeholder="you@example.com"
                 required
