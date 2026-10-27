@@ -1,62 +1,43 @@
 <?php
 session_start();
-$redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
+require_once __DIR__ . "/db.php";
 
-// Only allow internal pages as redirect destinations.
-$allowedRedirects = ['index.php', 'checkout.php'];
+$error = "";
+$email = "";
 
-if (!in_array($redirect, $allowedRedirects, true)) {
-    $redirect = 'index.php';
-}
-require_once __DIR__ . '/config/database.php';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $email = strtolower(trim($_POST["email"] ?? ""));
+    $password = $_POST["password"] ?? "";
 
-$error = '';
-$email = '';
-
-// Redirect customers who are already logged in.
-if (isset($_SESSION['user_id'])) {
-   header('Location: ' . $redirect);
-   exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = strtolower(trim($_POST['email'] ?? ''));
-    $password = $_POST['password'] ?? '';
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
-        $error = 'Please enter a valid email address and password.';
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === "") {
+        $error = "Please enter a valid email address and password.";
     } else {
         try {
-            // Find the customer by email.
             $stmt = $pdo->prepare(
-                'SELECT user_id, full_name, email, password_hash, role
-                 FROM users
-                 WHERE email = :email
-                 LIMIT 1'
+                "SELECT id, full_name, email, password, role
+                 FROM Users
+                 WHERE email = ?
+                 LIMIT 1"
             );
 
-            $stmt->execute(['email' => $email]);
-            $user = $stmt->fetch();
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Verify the submitted password against the stored hash.
-            if ($user && password_verify($password, $user['password_hash'])) {
-                // Prevent session fixation.
+            if ($user && password_verify($password, $user["password"])) {
                 session_regenerate_id(true);
 
-                $_SESSION['user_id'] = (int) $user['user_id'];
-                $_SESSION['user_name'] = $user['full_name'];
-                $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_role'] = $user['role'];
+                $_SESSION["customer_id"] = $user["id"];
+                $_SESSION["customer_name"] = $user["full_name"];
+                $_SESSION["customer_role"] = $user["role"];
 
-                header('Location: index.php');
+                header("Location: dashboard.php");
                 exit;
             }
 
-            // Use the same message for unknown emails and wrong passwords.
-            $error = 'Invalid email address or password.';
+            $error = "Invalid email address or password.";
         } catch (PDOException $e) {
-            error_log('Login error: ' . $e->getMessage());
-            $error = 'We could not log you in right now. Please try again later.';
+            error_log("Login error: " . $e->getMessage());
+            $error = "We could not log you in right now. Please try again later.";
         }
     }
 }
@@ -91,8 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" action="login.php" class="auth-form">
-            <input type="hidden" name="redirect"
-            value="<?= htmlspecialchars($redirect, ENT_QUOTES, 'UTF-8') ?>">
             <label for="email">Email address</label>
             <input
                 type="email"

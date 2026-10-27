@@ -11,27 +11,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($email === "" || $password === "") {
         $message = "Please enter your email and password.";
     } else {
-        $stmt = $pdo->prepare(
-            "SELECT id, name, email, password
-             FROM customers
-             WHERE email = ?"
-        );
-        $stmt->execute([$email]);
-        $customer = $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT id, full_name, email, password, role
+                 FROM Users
+                 WHERE email = ?"
+            );
 
-        if ($customer && password_verify(
-            $password,
-            $customer["password"]
-        )) {
-            session_regenerate_id(true);
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $_SESSION["customer_id"] = $customer["id"];
-            $_SESSION["customer_name"] = $customer["name"];
+            if ($user && password_verify($password, $user["password"])) {
+                session_regenerate_id(true);
 
-            header("Location: dashboard.php");
-            exit;
-        } else {
-            $message = "Invalid email or password.";
+                $_SESSION["customer_id"] = $user["id"];
+                $_SESSION["customer_name"] = $user["full_name"];
+                $_SESSION["customer_role"] = $user["role"];
+
+                header("Location: dashboard.php");
+                exit;
+            } else {
+                $message = "Invalid email or password.";
+            }
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            $message = "Login failed. Please check the database settings.";
         }
     }
 }
@@ -45,9 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Login</title>
 </head>
 <body>
-    <h1>Login to Your Account</h1>
+    <h1>Login</h1>
 
-    <p><?= htmlspecialchars($message) ?></p>
+    <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
 
     <form method="POST" action="">
         <label for="email">Email</label><br>
@@ -61,6 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <button type="submit">Login</button>
     </form>
 
-    <p>Don't have an account? <a href="register.php">Register here</a></p>
+    <p>Don't have an account?
+        <a href="register.php">Register here</a>
+    </p>
 </body>
 </html>

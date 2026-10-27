@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         try {
             $check = $pdo->prepare(
-                "SELECT id FROM customers WHERE email = ?"
+                "SELECT id FROM Users WHERE email = ?"
             );
             $check->execute([$email]);
 
@@ -30,19 +30,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 );
 
                 $stmt = $pdo->prepare(
-                    "INSERT INTO customers (name, email, password)
-                     VALUES (?, ?, ?)"
+                    "INSERT INTO Users
+                    (full_name, email, password, role)
+                    VALUES (?, ?, ?, ?)"
                 );
+
                 $stmt->execute([
                     $name,
                     $email,
-                    $hashedPassword
+                    $hashedPassword,
+                    "Customer"
                 ]);
 
-                $message = "Registration successful!";
+                $message = "Registration successful! You can now log in.";
             }
         } catch (PDOException $e) {
-            $message = "Something went wrong. Please try again.";
+            error_log($e->getMessage());
+            $message = "Something went wrong. Please check the database settings.";
         }
     }
 }
@@ -58,11 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
     <h1>Create Account</h1>
 
-    <p><?= htmlspecialchars($message) ?></p>
+    <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
 
     <form method="POST" action="">
         <label for="name">Full Name</label><br>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" maxlength="100" required>
         <br><br>
 
         <label for="email">Email</label><br>
@@ -76,5 +80,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <button type="submit">Register</button>
     </form>
+
+    <p>Already have an account?
+        <a href="login.php">Login here</a>
+    </p>
 </body>
 </html>

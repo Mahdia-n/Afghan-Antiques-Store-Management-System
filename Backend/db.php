@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$dbname = "small_business_db";
+$dbname = "afghan_antique_store";
 $username = "root";
 $password = "";
 
@@ -16,8 +16,8 @@ try {
         PDO::ERRMODE_EXCEPTION
     );
 
-
 } catch (PDOException $e) {
+    error_log($e->getMessage());
     die("Database connection failed.");
 }
 ?>
