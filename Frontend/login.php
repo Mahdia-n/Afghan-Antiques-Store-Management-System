@@ -91,6 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post" action="login.php" class="auth-form">
+            <input type="hidden" name="redirect"
+            value="<?= htmlspecialchars($redirect, ENT_QUOTES, 'UTF-8') ?>">
             <label for="email">Email address</label>
             <input
                 type="email"
