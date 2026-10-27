@@ -1,9 +1,9 @@
-
 <?php
+
 $host = 'localhost';
-$dbname = 'your_inventory_database';
-$username = 'your_mysql_username';
-$password = 'your_mysql_password';
+$dbname = 'afghan_antique_db';
+$username = 'root';
+$password = ''; // Default XAMPP MariaDB password
 
 try {
     $pdo = new PDO(
@@ -13,9 +13,10 @@ try {
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false
         ]
     );
 } catch (PDOException $e) {
     error_log($e->getMessage());
-    exit('Unable to connect to the database.');
+    exit('Database connection failed. Please check your configuration.');
 }
