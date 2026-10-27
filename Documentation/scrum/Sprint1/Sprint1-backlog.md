@@ -61,64 +61,15 @@
 **Overall Sprint 1 Status:** Backend functionality demonstrated successfully; frontend integration and final review pending.
 
 
-## Sprint Review
+## Sprint 1 Final Outcome – October 22, 2026
 
-**Date:** October 21, 2026  
-**Sprint:** Sprint 1 – Foundation and Customer Accounts  
-**Product Owner:** Khadija Khalil  
-**Scrum Master:** Mahdia Noori
+The team successfully demonstrated and tested the home page, customer registration (US01), login (US02), and logout (US03).
 
-### Demonstrated Features
+The product catalog (US04) was not yet confirmed as fully completed.
 
-- The team presented the completed Sprint 1 work.
-- The team successfully tested the Sprint 1 implementation.
-- Customer registration (US01), login (US02), and logout (US03) had previously been demonstrated and tested successfully.
-- Customer registration information was successfully stored in the MySQL database.
+For the complete meeting results, feedback, and lessons learned, see the separate `2026-10-21-Sprint 1 Review + Retrospective.md` file in this folder.
 
-### Acceptance Criteria Met
+**Sprint 1 Final Status:** Customer account features and home page successfully tested. Product catalog completion still needs confirmation. 
 
-- Sprint 1 testing was reported as successful.
-- The Product Owner and scrum master reviewed the team's progress and confirmed the successful Sprint 1 demonstration.
-- Final acceptance of individual user stories should match the features verified during the review.
 
-### Incomplete Work
 
-- No incomplete work was reported in the latest Sprint 1 update.
-- Any remaining improvements identified during the review should be documented and considered for the next sprint.
-
-### Feedback Received
-
-- The team successfully completed the Sprint 1 demonstration.
-- The Product Owner acknowledged the progress made during Sprint 1.
-- In accordance with the Product Backlog, the team will keep working on the remaining features.
-
----
-
-## Sprint Retrospective
-
-**Date:** October 21, 2026
-
-### What Went Well
-
-- Sprint 1 was successfully finished and tested by the team.
-- Registration, login, and logout functionality were successfully demonstrated.
-- The database successfully stored the customer's information.
-- Team members gained experience with GitHub, PHP, MySQL, and project development.
-
-### What Could Improve
-
-- To give sufficient time for integration, frontend and backend code should be shared earlier.
-- It is important for developers to frequently share their progress.
-- In order for others to examine and test their work, team members should post it to GitHub on time.
-
-### Actions for the Next Sprint
-
-- Continue regular communication between team members.
-- Upload development work to GitHub as features are completed.
-- Prioritize front-end and back-end development.
-- Rather than waiting until the last meeting, review and test features during the sprint.
-- Continue working on the upcoming Product Backlog user stories that have been given priority.
-
-**Overall Sprint 1 Result:** Sprint 1 was successfully tested and completed according to the team's latest report.
-
-**Documented by:** Khadija Khalil – Product Owner
