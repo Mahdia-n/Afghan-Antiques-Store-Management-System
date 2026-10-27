@@ -1,9 +1,8 @@
 <?php
-
 $host = 'localhost';
-$dbname = 'afghan_antique_db';
+$dbname = 'afghan_antique_store';
 $username = 'root';
-$password = ''; // Default XAMPP MariaDB password
+$password = '';
 
 try {
     $pdo = new PDO(
@@ -20,3 +19,4 @@ try {
     error_log($e->getMessage());
     exit('Database connection failed. Please check your configuration.');
 }
+?>

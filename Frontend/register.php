@@ -1,5 +1,6 @@
 <?php
 session_start();
+<<<<<<< HEAD
 
 $redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
 
@@ -10,6 +11,9 @@ if (!in_array($redirect, $allowedRedirects, true)) {
 }
 
 require_once __DIR__ . '/config/database.php';
+=======
+require_once __DIR__ . '/db.php';
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
 
 $errors = [];
 $name = '';
@@ -26,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmPassword = $_POST['confirm_password'] ?? '';
     $csrfToken = $_POST['csrf_token'] ?? '';
 
+<<<<<<< HEAD
     // Validate CSRF token.
     if (
         !is_string($csrfToken) ||
@@ -35,20 +40,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Validate name.
-    if ($name === '') {
-        $errors[] = 'Please enter your full name.';
-    } elseif (strlen($name) > 150) {
-        $errors[] = 'Your name must not exceed 150 characters.';
+=======
+    if (!is_string($csrfToken) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+        $errors[] = 'Your session expired. Please refresh the page and try again.';
     }
 
-    // Validate email.
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
+    if ($name === '') {
+        $errors[] = 'Please enter your full name.';
+    } elseif (strlen($name) > 100) {
+        $errors[] = 'Your name must not exceed 100 characters.';
+    }
+
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Please enter a valid email address.';
     } elseif (strlen($email) > 255) {
         $errors[] = 'Your email address is too long.';
     }
 
-    // Validate password.
     if (strlen($password) < 8) {
         $errors[] = 'Your password must be at least 8 characters.';
     }
@@ -57,13 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Your passwords do not match.';
     }
 
+<<<<<<< HEAD
     // Register customer.
+=======
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
     if (empty($errors)) {
         try {
             $check = $pdo->prepare(
-                'SELECT user_id FROM users WHERE email = :email LIMIT 1'
+                'SELECT id FROM Users WHERE email = ? LIMIT 1'
             );
-            $check->execute(['email' => $email]);
+            $check->execute([$email]);
 
             if ($check->fetch()) {
                 $errors[] = 'This email address is already registered. Please log in.';
@@ -71,17 +84,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
                 $insert = $pdo->prepare(
-                    'INSERT INTO users (full_name, email, password_hash)
-                     VALUES (:full_name, :email, :password_hash)'
+                    'INSERT INTO Users (full_name, email, password, role)
+                     VALUES (?, ?, ?, ?)'
                 );
 
                 $insert->execute([
-                    'full_name' => $name,
-                    'email' => $email,
-                    'password_hash' => $passwordHash
+                    $name,
+                    $email,
+                    $passwordHash,
+                    'Customer'
                 ]);
 
+<<<<<<< HEAD
                 // Refresh the CSRF token and preserve the destination.
+=======
+                $success = 'Your account has been created successfully! You can now log in.';
+                $name = '';
+                $email = '';
+
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
                 // Send the newly registered customer to login.
@@ -92,12 +113,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (PDOException $e) {
             error_log('Registration error: ' . $e->getMessage());
+<<<<<<< HEAD
 
             if ($e->getCode() === '23000') {
                 $errors[] = 'This email address may already be registered. Please log in.';
             } else {
                 $errors[] = 'We could not create your account right now. Please try again later.';
             }
+=======
+            $errors[] = 'We could not create your account right now. Please try again later.';
+>>>>>>> f71f5df1c1a07efcb8b5064b92aaae52510c9d48
         }
     }
 }
@@ -152,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 id="name"
                 name="name"
                 value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"
-                maxlength="150"
+                maxlength="100"
                 autocomplete="name"
                 placeholder="Enter your full name"
                 required
