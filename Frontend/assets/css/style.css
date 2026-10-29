@@ -1296,3 +1296,98 @@
         font-size: 16px;
     }
 }
+
+.product-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cart-action {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+
+.product-details-info .product-actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.product-details-info .add-to-cart-form {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 12px;
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+.product-details-info .add-to-cart-form label {
+    flex-basis: 100%;
+}
+
+.product-details-info .wishlist-form {
+    display: flex;
+    align-self: flex-end;
+    margin: 0;
+    padding: 0;
+}
+
+
+.product-details-info .product-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: flex-end !important;
+    gap: 12px !important;
+    width: fit-content !important;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+.product-details-info .add-to-cart-form {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-end !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    width: fit-content !important;
+    margin: 0 !important;
+}
+
+.product-details-info .add-to-cart-form label {
+    flex-basis: 100%;
+}
+
+
+/* Match Add to Cart and Add to Wishlist button sizes */
+.product-details-info .add-to-cart-form button,
+.product-details-info .wishlist-button {
+    height: 54px !important;
+    min-height: 54px !important;
+    padding: 0 22px !important;
+    font: inherit;
+    border-radius: 4px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Add to Wishlist */
+.product-details-info .wishlist-button {
+    border: 1px solid #60462f;
+    background: #fefaf7;
+    color: #60462f;
+}
+
+.product-details-info .wishlist-button:hover {
+    background: #60462f;
+    color: white;
+}
