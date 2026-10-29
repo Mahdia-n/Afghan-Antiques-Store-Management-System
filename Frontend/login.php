@@ -8,7 +8,12 @@ $email = '';
 
 $redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
 
-$allowedRedirects = ['index.php', 'checkout.php'];
+// Only allow known local pages.
+$allowedRedirects = [
+    'index.php',
+    'checkout.php',
+    'wishlist_page.php'
+];
 
 if (!in_array($redirect, $allowedRedirects, true)) {
     $redirect = 'index.php';
@@ -52,18 +57,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['user_role'] = $user['role'];
 
+                // Save the pending wishlist product after login.
+                if (isset($_SESSION['pending_wishlist_product_name'])) {
+                    $pendingProductName =
+                        $_SESSION['pending_wishlist_product_name'];
+
+                    try {
+                        $stmt = $pdo->prepare(
+                            'SELECT product_id
+                             FROM products
+                             WHERE product_name = ?
+                               AND is_active = 1
+                             LIMIT 1'
+                        );
+
+                        $stmt->execute([$pendingProductName]);
+                        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                        if ($product) {
+                            $productId = (int) $product['product_id'];
+                            $userId = (int) $_SESSION['user_id'];
+
+                            $stmt = $pdo->prepare(
+                                'SELECT 1
+                                 FROM wishlist
+                                 WHERE user_id = ?
+                                   AND product_id = ?
+                                 LIMIT 1'
+                            );
+
+                            $stmt->execute([$userId, $productId]);
+
+                            if (!$stmt->fetchColumn()) {
+                                $stmt = $pdo->prepare(
+                                    'INSERT INTO wishlist
+                                        (user_id, product_id)
+                                     VALUES (?, ?)'
+                                );
+
+                                $stmt->execute([$userId, $productId]);
+                            }
+                        }
+
+                        unset($_SESSION['pending_wishlist_product_name']);
+
+                        header('Location: wishlist_page.php?added=1');
+                        exit;
+
+                    } catch (PDOException $e) {
+                        error_log(
+                            'Saving pending wishlist product failed: '
+                            . $e->getMessage()
+                        );
+
+                        unset($_SESSION['pending_wishlist_product_name']);
+
+                        header('Location: wishlist_page.php');
+                        exit;
+                    }
+                }
+
+                // Normal login or checkout login.
                 header('Location: ' . $redirect);
                 exit;
             }
 
             $error = 'Invalid email address or password.';
+
         } catch (PDOException $e) {
             error_log('Login error: ' . $e->getMessage());
+
             $error = 'We could not log you in right now. Please try again later.';
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <header class="auth-header">
     <a href="index.php" class="auth-brand">Afghan Antiques</a>
     <a href="products.php" class="auth-back">Browse Collection</a>
+
 </header>
 
 <main class="auth-container">

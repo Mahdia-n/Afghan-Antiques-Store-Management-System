@@ -46,33 +46,28 @@ $product = ($id !== false && $id !== null && $id > 0)
 
 function e($value): string
 {
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>
-        <?= $product
-            ? e($product['name']) . ' | Afghan Antiques'
-            : 'Product Not Found | Afghan Antiques' ?>
-    </title>
+    <title><?= $product
+        ? e($product['name']) . ' | Afghan Antiques'
+        : 'Product Not Found | Afghan Antiques' ?></title>
 
     <link rel="stylesheet" href="assets/css/style.css">
 
     <style>
-        /* Quantity label stays above the purchase buttons */
         .product-details-info .quantity-label {
             display: block;
             margin: 24px 0 12px;
             font-weight: 600;
         }
 
-        /* Keep both forms together in one row */
         .product-details-info .product-actions {
             display: flex !important;
             flex-direction: row !important;
@@ -112,7 +107,7 @@ function e($value): string
         }
 
         .product-details-info .wishlist-button {
-            min-height: 70px;
+            min-height: 50px;
             box-sizing: border-box;
             padding: 12px 20px;
             border: 2px solid #8b653f;
@@ -130,19 +125,20 @@ function e($value): string
             color: #fff;
         }
 
-        .product-details-info .wishlist-button:disabled {
+        .product-details-info button:disabled,
+        .product-details-info input:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
         @media (max-width: 700px) {
             .product-details-info .product-actions {
+                width: 100% !important;
                 flex-wrap: wrap;
             }
         }
     </style>
 </head>
-
 <body>
 
 <header>
@@ -150,7 +146,11 @@ function e($value): string
         <a href="index.php">Home</a>
         <a href="products.php">Products</a>
         <a href="about.php">About Us</a>
-        <a href="cart.php">Cart</a>
+        <a href="cart.php">
+            Cart (<?= isset($_SESSION['cart'])
+                ? (int)array_sum($_SESSION['cart']) : 0 ?>)
+        </a>
+        <a href="wishlist_page.php">My Wishlist</a>
 
         <?php if (isset($_SESSION['user_id'])): ?>
             <a href="logout.php">Logout</a>
@@ -212,7 +212,7 @@ function e($value): string
 
                     <form
                         action="cart.php"
-                        method="post"
+                        method="POST"
                         class="add-to-cart-form"
                     >
                         <input type="hidden" name="action" value="add">
@@ -220,7 +220,7 @@ function e($value): string
                         <input
                             type="hidden"
                             name="product_id"
-                            value="<?= (int) $id ?>"
+                            value="<?= (int)$id ?>"
                         >
 
                         <input
@@ -229,15 +229,13 @@ function e($value): string
                             name="quantity"
                             value="1"
                             min="1"
-                            max="<?= (int) $product['quantity'] ?>"
+                            max="<?= (int)$product['quantity'] ?>"
                             required
                             <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
                         >
 
                         <button
                             type="submit"
-                            name="add_to_cart"
-                            value="1"
                             <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
                         >
                             Add to Cart
@@ -251,14 +249,13 @@ function e($value): string
                     >
                         <input
                             type="hidden"
-                            name="product_id"
-                            value="<?= (int) $id ?>"
+                            name="product_name"
+                            value="<?= e($product['name']) ?>"
                         >
 
                         <button
                             type="submit"
                             class="wishlist-button"
-                            <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
                         >
                             ♡ Add to Wishlist
                         </button>
