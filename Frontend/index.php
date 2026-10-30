@@ -187,6 +187,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
             <h3>Your Account</h3>
             <a href="login.php">Login</a>
             <a href="cart.php">Shopping Cart</a>
+            <a href="wishlist_page.php">My Wishlist</a>
         </div>
 
         <div>
