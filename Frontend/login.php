@@ -1,47 +1,138 @@
 <?php
 session_start();
-require_once __DIR__ . "/db.php";
 
-$error = "";
-$email = "";
+require_once __DIR__ . '/config/database.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = strtolower(trim($_POST["email"] ?? ""));
-    $password = $_POST["password"] ?? "";
+$error = '';
+$email = '';
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === "") {
-        $error = "Please enter a valid email address and password.";
+$redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? 'index.php';
+
+// Only allow known local pages.
+$allowedRedirects = [
+    'index.php',
+    'checkout.php',
+    'wishlist_page.php'
+];
+
+if (!in_array($redirect, $allowedRedirects, true)) {
+    $redirect = 'index.php';
+}
+
+// If already logged in, continue to the requested page.
+if (isset($_SESSION['user_id'])) {
+    header('Location: ' . $redirect);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    $password = $_POST['password'] ?? '';
+
+    $redirect = $_POST['redirect'] ?? 'index.php';
+
+    if (!in_array($redirect, $allowedRedirects, true)) {
+        $redirect = 'index.php';
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
+        $error = 'Please enter a valid email address and password.';
     } else {
         try {
             $stmt = $pdo->prepare(
-                "SELECT id, full_name, email, password, role
-                 FROM Users
+                'SELECT user_id, full_name, email, password_hash, role
+                 FROM users
                  WHERE email = ?
-                 LIMIT 1"
+                 LIMIT 1'
             );
 
             $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $user = $stmt->fetch();
 
-            if ($user && password_verify($password, $user["password"])) {
+            if ($user && password_verify($password, $user['password_hash'])) {
                 session_regenerate_id(true);
 
-                $_SESSION["customer_id"] = $user["id"];
-                $_SESSION["customer_name"] = $user["full_name"];
-                $_SESSION["customer_role"] = $user["role"];
+                $_SESSION['user_id'] = (int) $user['user_id'];
+                $_SESSION['user_name'] = $user['full_name'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_role'] = $user['role'];
 
-                header("Location: dashboard.php");
+                // Save the pending wishlist product after login.
+                if (isset($_SESSION['pending_wishlist_product_name'])) {
+                    $pendingProductName =
+                        $_SESSION['pending_wishlist_product_name'];
+
+                    try {
+                        $stmt = $pdo->prepare(
+                            'SELECT product_id
+                             FROM products
+                             WHERE product_name = ?
+                               AND is_active = 1
+                             LIMIT 1'
+                        );
+
+                        $stmt->execute([$pendingProductName]);
+                        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                        if ($product) {
+                            $productId = (int) $product['product_id'];
+                            $userId = (int) $_SESSION['user_id'];
+
+                            $stmt = $pdo->prepare(
+                                'SELECT 1
+                                 FROM wishlist
+                                 WHERE user_id = ?
+                                   AND product_id = ?
+                                 LIMIT 1'
+                            );
+
+                            $stmt->execute([$userId, $productId]);
+
+                            if (!$stmt->fetchColumn()) {
+                                $stmt = $pdo->prepare(
+                                    'INSERT INTO wishlist
+                                        (user_id, product_id)
+                                     VALUES (?, ?)'
+                                );
+
+                                $stmt->execute([$userId, $productId]);
+                            }
+                        }
+
+                        unset($_SESSION['pending_wishlist_product_name']);
+
+                        header('Location: wishlist_page.php?added=1');
+                        exit;
+
+                    } catch (PDOException $e) {
+                        error_log(
+                            'Saving pending wishlist product failed: '
+                            . $e->getMessage()
+                        );
+
+                        unset($_SESSION['pending_wishlist_product_name']);
+
+                        header('Location: wishlist_page.php');
+                        exit;
+                    }
+                }
+
+                // Normal login or checkout login.
+                header('Location: ' . $redirect);
                 exit;
             }
 
-            $error = "Invalid email address or password.";
+            $error = 'Invalid email address or password.';
+
         } catch (PDOException $e) {
-            error_log("Login error: " . $e->getMessage());
-            $error = "We could not log you in right now. Please try again later.";
+            error_log('Login error: ' . $e->getMessage());
+
+            $error = 'We could not log you in right now. Please try again later.';
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,6 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <header class="auth-header">
     <a href="index.php" class="auth-brand">Afghan Antiques</a>
     <a href="products.php" class="auth-back">Browse Collection</a>
+
 </header>
 
 <main class="auth-container">
@@ -72,6 +164,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php endif; ?>
 
         <form method="post" action="login.php" class="auth-form">
+            <input
+                type="hidden"
+                name="redirect"
+                value="<?= htmlspecialchars($redirect, ENT_QUOTES, 'UTF-8') ?>"
+            >
+
             <label for="email">Email address</label>
             <input
                 type="email"
@@ -99,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <p class="auth-switch">
             Don't have an account?
-            <a href="register.php">Sign up</a>
+            <a href="register.php?redirect=<?= urlencode($redirect) ?>">Sign up</a>
         </p>
     </section>
 </main>

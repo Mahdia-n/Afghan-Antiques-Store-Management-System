@@ -12,4 +12,7 @@ Sprint 1 Review + Retrospective: https://drive.google.com/file/d/1oBZR90pSGjXv1U
 
 sprint 2 Planning + sprint 1 Review: https://drive.google.com/file/d/1otXunql0NQ1Qx28vTdj40frWCldcp73O/view?usp=sharing
 
+sprint 2 Progress Meeting: https://drive.google.com/file/d/13fxc2-rlWWlqRAFrbxmroqXlj2JdgPGa/view?usp=sharing
+
+sprint 2 Review + Retrospective: https://drive.google.com/file/d/1LE2rFTsGk7i_48MFWm1rNyOLGC0CxlkK/view?usp=sharing
 

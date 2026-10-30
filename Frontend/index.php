@@ -40,7 +40,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
         <a href="index.php">Home</a>
         <a href="products.php">Products</a>
 
-        <?php if (isset($_SESSION['customer_id'])): ?>
+        <?php if (isset($_SESSION['user_id'])): ?>
             <a href="logout.php">Logout</a>
         <?php else: ?>
             <a href="login.php">Login</a>

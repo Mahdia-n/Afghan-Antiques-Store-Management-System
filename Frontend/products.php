@@ -19,17 +19,13 @@ function e($value): string {
 try {
     require_once __DIR__ . '/config/database.php';
 
-    $categories = $pdo->query(
-        "SELECT DISTINCT category
-         FROM inventory
-         WHERE category IS NOT NULL AND category <> ''
-         ORDER BY category"
-    )->fetchAll(PDO::FETCH_COLUMN);
-
+    // Get categories from the products table.
+    // Your current products table does not have a category column,
+    // so we will display "All Categories" until categories are connected.
     $sql = "SELECT product_id, product_name, description,
-                   category, price, quantity, image
-            FROM inventory
-            WHERE 1=1";
+                   price, quantity, image
+            FROM products
+            WHERE is_active = 1";
 
     $params = [];
 
@@ -37,11 +33,6 @@ try {
         $sql .= " AND (product_name LIKE :search
                        OR description LIKE :search)";
         $params['search'] = "%$search%";
-    }
-
-    if ($category !== '') {
-        $sql .= " AND category = :category";
-        $params['category'] = $category;
     }
 
     $sql .= " ORDER BY product_name ASC";
@@ -78,7 +69,7 @@ try {
         <a href="index.php">Home</a>
         <a href="products.php">Products</a>
 
-        <?php if (isset($_SESSION['customer_id'])): ?>
+        <?php if (isset($_SESSION['user_id'])): ?>
             <a href="logout.php">Logout</a>
         <?php else: ?>
             <a href="login.php">Login</a>
@@ -107,19 +98,6 @@ try {
             placeholder="Search antiques..."
             value="<?= e($search) ?>"
         >
-
-        <select name="category">
-            <option value="">All Categories</option>
-
-            <?php foreach ($categories as $item): ?>
-                <option
-                    value="<?= e($item) ?>"
-                    <?= $category === $item ? 'selected' : '' ?>
-                >
-                    <?= e($item) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
 
         <button type="submit" class="primary-button">Search</button>
         <a href="products.php" class="product-button">Clear</a>
@@ -155,7 +133,7 @@ try {
                     <div class="product-art">
                         <?php if (!empty($product['image'])): ?>
                             <img
-                                src="assets/images/<?= rawurlencode(basename($product['image'])) ?>"
+                                src="<?= e($product['image']) ?>"
                                 alt="<?= e($product['product_name']) ?>"
                             >
                         <?php else: ?>
@@ -166,9 +144,7 @@ try {
                     </div>
 
                     <div class="product-info">
-                        <p class="product-category">
-                            <?= e($product['category']) ?>
-                        </p>
+                        <p class="product-category">Antiques</p>
 
                         <h2><?= e($product['product_name']) ?></h2>
 
