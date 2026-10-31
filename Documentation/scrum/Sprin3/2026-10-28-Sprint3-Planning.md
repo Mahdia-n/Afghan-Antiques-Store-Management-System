@@ -4,6 +4,7 @@
 **Sprint:** 3  
 **Date:** October 28, 2026  
 **Time:** 7:30 am +4:30 
+
 **Facilitator:** Mahdia Noori – Scrum Master  
 **Product Owner:** Khadija Khalil
 
