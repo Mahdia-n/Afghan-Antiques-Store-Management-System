@@ -28,9 +28,10 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 | US07 | Add products to the shopping cart | High | To Do |
 | US08 | Change quantities or remove items from the shopping cart | High | To Do |
 | US10 | As a customer, I want to provide a delivery address so that my order can be sent to the correct location. | High | To Do |
+| US19 | As a customer, I want to save favorite products to a wishlist so that I can revisit them and purchase them later. | Low | To Do |
 
 
-**Note:** These five user stories were selected by the team for Sprint 2. US04 was carried forward because its full completion was not confirmed during Sprint 1.
+**Note:** These six user stories were selected by the team for Sprint 2. US04 was carried forward because its full completion was not confirmed during Sprint 1.
 
 
 ## Progress Log
@@ -43,6 +44,7 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 - Implement backend support for product details, photos, descriptions, and prices (US05).
 - Develop product search functionality (US06).
 - Implement functionality to save customer delivery addresses (US10).
+- Support wishlist functionality if included in the sprint implementation (US19).
 - Coordinate with the frontend developer to integrate and test the implemented features.
 - Upload completed backend code and updates to GitHub.
 
@@ -52,6 +54,7 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 - Create product presentation pages displaying photos, descriptions, and prices (US05).
 - Implement the product search interface (US06).
 - Develop the customer delivery address form (US10).
+- Develop the wishlist interface if included in the sprint implementation (US19).
 - Coordinate with the backend developer to connect frontend pages with backend functionality.
 - Upload and share frontend code through GitHub for review and integration.
 
@@ -60,6 +63,7 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 
 - Incomplete product catalog functionality carried over from Sprint 1 may affect Sprint 2 progress.
 - Frontend and backend integration must be completed before the team can verify the complete customer experience.
+- Search and wishlist functionality may require additional coordination between frontend and backend development.
 - Product images, descriptions, and prices must be properly connected to the database.
 - The team must prioritize high-priority requirements within the limited sprint duration.
 
@@ -79,6 +83,7 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 - Review the product catalog and confirm that customers can browse available antiques.
 - Verify that product photos, descriptions, and prices are displayed correctly.
 - Check whether product search returns relevant results.
+- Review wishlist functionality.
 - Provide feedback and determine whether completed stories meet their acceptance criteria.
 - Update the Product Backlog according to completed, incomplete, or changed requirements.
 
