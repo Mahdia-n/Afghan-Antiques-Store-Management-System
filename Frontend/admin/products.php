@@ -13,30 +13,10 @@ if (
     exit('Access denied. Please log in as an administrator.');
 }
 
-// CSRF protection for delete actions
+// CSRF protection
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-// Fetch inventory
-$stmt = $pdo->query("
-    SELECT
-        p.product_id,
-        p.product_name,
-        p.description,
-        p.price,
-        p.quantity,
-        p.image,
-        p.is_active,
-        p.created_at,
-        c.category_name
-    FROM products p
-    LEFT JOIN categories c
-        ON p.category_id = c.category_id
-    ORDER BY p.created_at DESC
-");
-
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Safe HTML output
 function h($value): string
@@ -48,16 +28,42 @@ function h($value): string
     );
 }
 
+// Fetch inventory
+try {
+    $stmt = $pdo->query("
+        SELECT
+            p.product_id,
+            p.product_name,
+            p.description,
+            p.price,
+            p.quantity,
+            p.image,
+            p.is_active,
+            p.created_at,
+            c.category_name
+        FROM products p
+        LEFT JOIN categories c
+            ON p.category_id = c.category_id
+        ORDER BY p.created_at DESC
+    ");
+
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    error_log('Inventory loading error: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Unable to load product inventory. Please check your database.');
+}
+
 // Inventory statistics
 $totalProducts = count($products);
-$totalStock = 0;
 $activeProducts = 0;
+$totalStock = 0;
 
 foreach ($products as $product) {
-    $totalStock += (int)$product['quantity'];
-
     if ((int)$product['is_active'] === 1) {
         $activeProducts++;
+        $totalStock += (int)$product['quantity'];
     }
 }
 
@@ -65,11 +71,12 @@ foreach ($products as $product) {
 $added = isset($_GET['added']) && $_GET['added'] === '1';
 $updated = isset($_GET['updated']) && $_GET['updated'] === '1';
 $deleted = isset($_GET['deleted']) && $_GET['deleted'] === '1';
-$statusUpdated = isset($_GET['status_updated'])
-    && $_GET['status_updated'] === '1';
+$notFound = isset($_GET['not_found']) && $_GET['not_found'] === '1';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -374,6 +381,12 @@ $statusUpdated = isset($_GET['status_updated'])
             color: var(--green);
         }
 
+        .notice-warning {
+            background: #fff7e8;
+            border-left-color: var(--gold);
+            color: var(--brown);
+        }
+
         .empty {
             padding: 55px 20px;
             color: var(--muted);
@@ -435,12 +448,15 @@ $statusUpdated = isset($_GET['status_updated'])
 </head>
 
 <body>
+
 <div class="container">
 
     <header class="header">
+
         <div>
             <div class="eyebrow">AFGHAN ANTIQUE STORE</div>
             <h1>Inventory Management</h1>
+
             <p class="subtitle">
                 Manage your antique collection and stock levels.
             </p>
@@ -449,7 +465,10 @@ $statusUpdated = isset($_GET['status_updated'])
         <a href="add_product.php" class="btn btn-primary">
             + Add New Product
         </a>
+
     </header>
+
+    <!-- Status messages -->
 
     <?php if ($added): ?>
         <div class="notice">
@@ -469,15 +488,18 @@ $statusUpdated = isset($_GET['status_updated'])
         </div>
     <?php endif; ?>
 
-    <?php if ($statusUpdated): ?>
-        <div class="notice">
-            Product status updated successfully.
+    <?php if ($notFound): ?>
+        <div class="notice notice-warning">
+            This product was not found or has already been removed.
         </div>
     <?php endif; ?>
 
+    <!-- Inventory statistics -->
+
     <section class="stats">
+
         <div class="stat-card">
-            <span class="stat-label">Total Products</span>
+            <span class="stat-label">Total Product Records</span>
             <span class="stat-value"><?= $totalProducts ?></span>
         </div>
 
@@ -487,13 +509,18 @@ $statusUpdated = isset($_GET['status_updated'])
         </div>
 
         <div class="stat-card">
-            <span class="stat-label">Total Units in Stock</span>
+            <span class="stat-label">Active Units in Stock</span>
             <span class="stat-value"><?= $totalStock ?></span>
         </div>
+
     </section>
 
+    <!-- Product inventory -->
+
     <section class="panel">
+
         <div class="panel-header">
+
             <h2>Product Inventory</h2>
 
             <input
@@ -503,49 +530,72 @@ $statusUpdated = isset($_GET['status_updated'])
                 placeholder="Search products..."
                 aria-label="Search inventory"
             >
+
         </div>
 
         <?php if (!$products): ?>
+
             <div class="empty">
+
                 <h3>Your inventory is empty</h3>
+
                 <p>Add your first antique product to get started.</p>
 
                 <a href="add_product.php" class="btn btn-primary">
                     Add Your First Product
                 </a>
+
             </div>
+
         <?php else: ?>
+
             <div class="table-wrap">
+
                 <table>
+
                     <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
 
                     <tbody id="inventoryBody">
+
                     <?php foreach ($products as $product): ?>
+
                         <tr class="product-row">
+
+                            <!-- Product details -->
+
                             <td>
+
                                 <div class="product-cell">
+
                                     <div class="product-image">
+
                                         <?php if (!empty($product['image'])): ?>
+
                                             <img
                                                 src="../<?= h($product['image']) ?>"
                                                 alt="<?= h($product['product_name']) ?>"
                                                 loading="lazy"
                                             >
+
                                         <?php else: ?>
+
                                             No image
+
                                         <?php endif; ?>
+
                                     </div>
 
                                     <div>
+
                                         <div class="product-name">
                                             <?= h($product['product_name']) ?>
                                         </div>
@@ -553,36 +603,57 @@ $statusUpdated = isset($_GET['status_updated'])
                                         <div class="product-id">
                                             ID: <?= (int)$product['product_id'] ?>
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </td>
+
+                            <!-- Category -->
 
                             <td>
                                 <?= h($product['category_name'] ?? 'Uncategorized') ?>
                             </td>
 
+                            <!-- Price -->
+
                             <td class="price">
                                 $<?= number_format((float)$product['price'], 2) ?>
                             </td>
+
+                            <!-- Quantity -->
 
                             <td class="stock">
                                 <?= (int)$product['quantity'] ?> units
                             </td>
 
+                            <!-- Status -->
+
                             <td>
+
                                 <?php if ((int)$product['is_active'] === 1): ?>
+
                                     <span class="status status-active">
                                         Active
                                     </span>
+
                                 <?php else: ?>
+
                                     <span class="status status-inactive">
-                                        Deleted
+                                        Inactive
                                     </span>
+
                                 <?php endif; ?>
+
                             </td>
 
+                            <!-- Actions -->
+
                             <td>
+
                                 <div class="actions">
+
                                     <a
                                         class="btn btn-secondary"
                                         href="edit_product.php?id=<?= (int)$product['product_id'] ?>"
@@ -591,11 +662,13 @@ $statusUpdated = isset($_GET['status_updated'])
                                     </a>
 
                                     <?php if ((int)$product['is_active'] === 1): ?>
+
                                         <form
                                             method="POST"
                                             action="delete_product.php"
-                                            onsubmit="return confirm('Remove this product from active inventory? Its record and order history will be preserved.');"
+                                            onsubmit="return confirm('Are you sure you want to remove this product from active inventory? Its order history will be preserved.');"
                                         >
+
                                             <input
                                                 type="hidden"
                                                 name="csrf_token"
@@ -614,25 +687,39 @@ $statusUpdated = isset($_GET['status_updated'])
                                             >
                                                 Delete
                                             </button>
+
                                         </form>
+
                                     <?php else: ?>
+
                                         <span class="status status-inactive">
                                             Removed
                                         </span>
+
                                     <?php endif; ?>
+
                                 </div>
+
                             </td>
+
                         </tr>
+
                     <?php endforeach; ?>
+
                     </tbody>
+
                 </table>
 
                 <div class="no-results" id="noResults">
                     No matching products found.
                 </div>
+
             </div>
+
         <?php endif; ?>
+
     </section>
+
 </div>
 
 <script>
@@ -641,11 +728,14 @@ $statusUpdated = isset($_GET['status_updated'])
     const noResults = document.getElementById('noResults');
 
     if (searchInput) {
+
         searchInput.addEventListener('input', function () {
+
             const query = this.value.toLowerCase().trim();
             let visibleCount = 0;
 
             rows.forEach(function (row) {
+
                 const matches = row.textContent
                     .toLowerCase()
                     .includes(query);
@@ -655,13 +745,16 @@ $statusUpdated = isset($_GET['status_updated'])
                 if (matches) {
                     visibleCount++;
                 }
+
             });
 
             if (noResults) {
                 noResults.style.display =
                     visibleCount === 0 ? 'block' : 'none';
             }
+
         });
+
     }
 </script>
 

@@ -24,6 +24,7 @@ $quantityInput = '0';
 
 // Process form submission.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $name = trim($_POST['product_name'] ?? '');
     $categoryName = trim($_POST['category_name'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -61,42 +62,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Validate category text.
+    // Validate category.
     if (!$error && mb_strlen($categoryName) > 100) {
         $error = 'Category name cannot exceed 100 characters.';
     }
 
-    // Resolve or create the category.
+    // Resolve or create category.
     $categoryId = null;
 
     if (!$error && $categoryName !== '') {
         try {
-            // Reuse an existing category, ignoring letter case.
             $stmt = $pdo->prepare(
                 "SELECT category_id
                  FROM categories
                  WHERE LOWER(category_name) = LOWER(?)
                  LIMIT 1"
             );
-            $stmt->execute([$categoryName]);
 
+            $stmt->execute([$categoryName]);
             $existingCategory = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($existingCategory) {
                 $categoryId = (int)$existingCategory['category_id'];
             } else {
-                // Create the category if it does not exist.
                 $stmt = $pdo->prepare(
                     "INSERT INTO categories
-                        (category_name, description)
+                     (category_name, description)
                      VALUES (?, ?)"
                 );
-                $stmt->execute([$categoryName, null]);
 
+                $stmt->execute([$categoryName, null]);
                 $categoryId = (int)$pdo->lastInsertId();
             }
+
         } catch (PDOException $e) {
-            // Handle a possible duplicate category created concurrently.
+
+            // Check whether the category already exists.
             try {
                 $stmt = $pdo->prepare(
                     "SELECT category_id
@@ -104,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      WHERE LOWER(category_name) = LOWER(?)
                      LIMIT 1"
                 );
+
                 $stmt->execute([$categoryName]);
                 $existingCategory = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -112,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $error = 'Could not find or create this category.';
                 }
+
             } catch (PDOException $lookupError) {
                 $error = 'Could not find or create this category.';
             }
@@ -127,11 +130,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         isset($_FILES['image']) &&
         $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE
     ) {
+
         if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
             $error = 'The image upload failed. Please try again.';
+
         } elseif ($_FILES['image']['size'] > 5 * 1024 * 1024) {
             $error = 'The image must be smaller than 5 MB.';
+
         } else {
+
             $tmp = $_FILES['image']['tmp_name'];
             $imageInfo = @getimagesize($tmp);
 
@@ -146,7 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!$imageInfo || !isset($allowedTypes[$mime])) {
                 $error = 'Upload a valid JPG, PNG, WEBP, or GIF image.';
+
             } else {
+
                 $imageDirectory = __DIR__ . '/../assets/images/';
 
                 if (
@@ -154,9 +163,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     !mkdir($imageDirectory, 0755, true)
                 ) {
                     $error = 'Could not create the image directory.';
+
                 } elseif (!is_writable($imageDirectory)) {
                     $error = 'The image directory is not writable.';
+
                 } else {
+
                     $filename = bin2hex(random_bytes(16))
                         . '.' . $allowedTypes[$mime];
 
@@ -173,30 +185,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert product into the database.
+    // Insert product into database.
     if (!$error) {
+
         try {
             $stmt = $pdo->prepare(
                 "INSERT INTO products
-                    (
-                        category_id,
-                        product_name,
-                        description,
-                        price,
-                        quantity,
-                        image,
-                        is_active
-                    )
-                 VALUES
-                    (
-                        :category_id,
-                        :product_name,
-                        :description,
-                        :price,
-                        :quantity,
-                        :image,
-                        1
-                    )"
+                (
+                    category_id,
+                    product_name,
+                    description,
+                    price,
+                    quantity,
+                    image,
+                    is_active
+                )
+                VALUES
+                (
+                    :category_id,
+                    :product_name,
+                    :description,
+                    :price,
+                    :quantity,
+                    :image,
+                    1
+                )"
             );
 
             $stmt->execute([
@@ -213,11 +226,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':image' => $imagePath
             ]);
 
-            // Product saved successfully.
             header('Location: products.php?added=1');
             exit;
+
         } catch (PDOException $e) {
-            // Remove the uploaded file if database insertion fails.
+
+            // Remove uploaded image if database insertion fails.
             if (
                 $uploadedImageFullPath !== null &&
                 is_file($uploadedImageFullPath)
@@ -225,19 +239,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unlink($uploadedImageFullPath);
             }
 
-            $error = 'Could not add the product. Please try again.';
+            // Log technical error for development.
+            error_log('Add product error: ' . $e->getMessage());
+
+            $error = 'Could not add the product. Please check your database configuration and try again.';
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Add Product | Afghan Antique Store</title>
-
+    <link rel="stylesheet" href="admin.css">
     <style>
         * {
             box-sizing: border-box;
@@ -483,9 +502,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+
 <div class="container">
 
     <header class="topbar">
+
         <div>
             <div class="eyebrow">AFGHAN ANTIQUE STORE</div>
             <h1>Add a Product</h1>
@@ -497,9 +518,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="products.php" class="btn btn-secondary">
             View Inventory
         </a>
+
     </header>
 
     <main class="panel">
+
         <div class="panel-heading">
             <h2>Product Information</h2>
             <p>Enter the details below to add a product to your inventory.</p>
@@ -512,10 +535,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" enctype="multipart/form-data">
+
             <div class="form-grid">
 
                 <div class="field full-width">
                     <label for="product_name">Product Name *</label>
+
                     <input
                         id="product_name"
                         name="product_name"
@@ -529,6 +554,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field full-width">
                     <label for="category_name">Category</label>
+
                     <input
                         id="category_name"
                         name="category_name"
@@ -537,6 +563,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         placeholder="e.g., Clocks, Furniture, Afghan Carpets"
                         value="<?= htmlspecialchars($categoryName, ENT_QUOTES, 'UTF-8') ?>"
                     >
+
                     <span class="hint">
                         Enter an existing category or type a new category name.
                         New categories are created automatically.
@@ -545,6 +572,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field full-width">
                     <label for="description">Product Description</label>
+
                     <textarea
                         id="description"
                         name="description"
@@ -554,6 +582,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field">
                     <label for="price">Price ($) *</label>
+
                     <input
                         id="price"
                         name="price"
@@ -569,6 +598,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field">
                     <label for="quantity">Inventory Quantity *</label>
+
                     <input
                         id="quantity"
                         name="quantity"
@@ -582,12 +612,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field full-width">
                     <label for="image">Product Image</label>
+
                     <input
                         id="image"
                         name="image"
                         type="file"
                         accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
                     >
+
                     <span class="hint">
                         Optional. JPG, PNG, WEBP, or GIF. Maximum file size: 5 MB.
                     </span>
@@ -596,6 +628,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="actions">
+
                 <button type="submit" class="btn btn-primary">
                     Save Product
                 </button>
@@ -603,9 +636,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="products.php" class="btn btn-secondary">
                     Cancel
                 </a>
+
             </div>
+
         </form>
+
     </main>
+
 </div>
+
 </body>
 </html>

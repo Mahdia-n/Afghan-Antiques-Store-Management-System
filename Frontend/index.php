@@ -92,7 +92,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
         <div class="product-grid">
             <article class="product-card">
                 <div class="product-art clock">
-                    <img src="assets/images/clock.png" alt="Antique Mantel Clock">
+                    <img src="assets/images/antique-mantel-clock.png" alt="Antique Mantel Clock">
                 </div>
                 <div class="product-info">
                     <p class="product-category">TIMEPIECES</p>
@@ -105,7 +105,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
 
             <article class="product-card">
                 <div class="product-art vase">
-                    <img src="assets/images/vase.png" alt="Classic Ceramic Vase">
+                    <img src="assets/images/ceramic-vase.png" alt="Classic Ceramic Vase">
                 </div>
                 <div class="product-info">
                     <p class="product-category">CERAMICS</p>
@@ -118,7 +118,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
 
             <article class="product-card">
                 <div class="product-art cabinet">
-                    <img src="assets/images/cabinet.png" alt="Vintage Wooden Cabinet">
+                    <img src="assets/images/vintage-wooden-cabinet.png" alt="Vintage Wooden Cabinet">
                 </div>
                 <div class="product-info">
                     <p class="product-category">FURNITURE</p>
@@ -131,7 +131,7 @@ $cartCount = (int) ($_SESSION['cart_count'] ?? 0);
 
             <article class="product-card">
                 <div class="product-art lamp">
-                    <img src="assets/images/lamp.png" alt="Victorian Table Lamp">
+                    <img src="assets/images/victorian-table-lamp.png" alt="Victorian Table Lamp">
                 </div>
                 <div class="product-info">
                     <p class="product-category">LIGHTING</p>

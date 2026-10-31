@@ -10,7 +10,7 @@ if (
     $_SESSION['user_role'] !== 'admin'
 ) {
     http_response_code(403);
-    exit('Access denied.');
+    exit('Access denied. Administrator access required.');
 }
 
 // Only allow POST requests
@@ -31,6 +31,7 @@ if (
     exit('Invalid security token. Please return to inventory and try again.');
 }
 
+// Validate product ID
 $productId = filter_input(
     INPUT_POST,
     'product_id',
@@ -43,7 +44,23 @@ if (!$productId || $productId < 1) {
 }
 
 try {
-    // Soft delete: preserve the product and order history.
+
+    // Check whether the product exists and is active
+    $stmt = $pdo->prepare(
+        "SELECT product_id
+         FROM products
+         WHERE product_id = ? AND is_active = 1
+         LIMIT 1"
+    );
+
+    $stmt->execute([$productId]);
+
+    if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+        header('Location: products.php?not_found=1');
+        exit;
+    }
+
+    // Soft delete the product
     $stmt = $pdo->prepare(
         "UPDATE products
          SET is_active = 0
@@ -54,7 +71,11 @@ try {
 
     header('Location: products.php?deleted=1');
     exit;
+
 } catch (PDOException $e) {
+
+    error_log('Delete product error: ' . $e->getMessage());
+
     http_response_code(500);
-    exit('Could not delete the product.');
+    exit('Could not delete the product. Please try again.');
 }

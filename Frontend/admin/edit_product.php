@@ -13,16 +13,18 @@ if (
     exit('Access denied. Please log in as an administrator.');
 }
 
-// CSRF protection
+// Generate CSRF token.
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+// Escape output.
 function h($value): string
 {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
+// Validate product ID.
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$id || $id < 1) {
@@ -31,22 +33,16 @@ if (!$id || $id < 1) {
 }
 
 $error = '';
-$success = '';
 
+// Load product.
 try {
-    $categoryStmt = $pdo->query(
-        "SELECT category_id, category_name
-         FROM categories
-         ORDER BY category_name"
-    );
-    $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
-
     $stmt = $pdo->prepare(
-        "SELECT product_id, category_id, product_name, description,
-                price, quantity, image, is_active
+        "SELECT *
          FROM products
-         WHERE product_id = ?"
+         WHERE product_id = ?
+         LIMIT 1"
     );
+
     $stmt->execute([$id]);
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -54,102 +50,189 @@ try {
         http_response_code(404);
         exit('Product not found.');
     }
+
 } catch (PDOException $e) {
+    error_log('Edit product loading error: ' . $e->getMessage());
     http_response_code(500);
     exit('Unable to load product information.');
 }
 
-// Default form values
+// Default form values.
 $name = $product['product_name'];
+$categoryName = '';
 $description = $product['description'] ?? '';
 $price = $product['price'];
 $quantity = $product['quantity'];
-$categoryId = $product['category_id'];
 $isActive = (int)$product['is_active'];
-$imagePath = $product['image'];
+$imagePath = $product['image'] ?? '';
 
+// Load existing category name.
+if (!empty($product['category_id'])) {
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT category_name
+             FROM categories
+             WHERE category_id = ?"
+        );
+
+        $stmt->execute([$product['category_id']]);
+        $categoryName = $stmt->fetchColumn() ?: '';
+
+    } catch (PDOException $e) {
+        error_log('Category loading error: ' . $e->getMessage());
+    }
+}
+
+// Process form submission.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Verify CSRF token.
     $token = $_POST['csrf_token'] ?? '';
 
-    if (!is_string($token) ||
-        !hash_equals($_SESSION['csrf_token'], $token)) {
-        $error = 'Your session expired or the form was invalid. Please refresh and try again.';
+    if (
+        !is_string($token) ||
+        !hash_equals($_SESSION['csrf_token'], $token)
+    ) {
+        $error = 'Invalid security token. Please refresh and try again.';
     }
 
+    // Get submitted values.
     $name = trim($_POST['product_name'] ?? '');
+    $categoryName = trim($_POST['category_name'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $priceInput = trim($_POST['price'] ?? '');
     $quantityInput = trim($_POST['quantity'] ?? '');
-    $categoryInput = $_POST['category_id'] ?? '';
     $statusInput = $_POST['is_active'] ?? '';
 
+    // Validate product name.
     if (!$error && $name === '') {
         $error = 'Product name is required.';
-    } elseif (
-        !$error &&
-        (strlen($name) > 200)
-    ) {
+    } elseif (!$error && mb_strlen($name) > 200) {
         $error = 'Product name cannot exceed 200 characters.';
-    } elseif (
-        !$error &&
-        ($priceInput === '' ||
-         !is_numeric($priceInput) ||
-         !is_finite((float)$priceInput) ||
-         (float)$priceInput < 0 ||
-         (float)$priceInput > 99999999.99)
-    ) {
-        $error = 'Enter a valid price.';
-    } elseif (
-        !$error &&
-        ($quantityInput === '' ||
-         filter_var($quantityInput, FILTER_VALIDATE_INT) === false ||
-         (int)$quantityInput < 0)
-    ) {
-        $error = 'Enter a valid, non-negative quantity.';
     }
 
-    // Validate category
+    // Validate category.
+    if (!$error && mb_strlen($categoryName) > 100) {
+        $error = 'Category name cannot exceed 100 characters.';
+    }
+
+    // Validate price.
+    if (!$error) {
+        if (
+            $priceInput === '' ||
+            !is_numeric($priceInput) ||
+            !is_finite((float)$priceInput) ||
+            (float)$priceInput < 0 ||
+            (float)$priceInput > 99999999.99
+        ) {
+            $error = 'Please enter a valid price.';
+        }
+    }
+
+    // Validate quantity.
+    if (!$error) {
+        if (
+            $quantityInput === '' ||
+            filter_var($quantityInput, FILTER_VALIDATE_INT) === false ||
+            (int)$quantityInput < 0
+        ) {
+            $error = 'Please enter a valid quantity.';
+        }
+    }
+
+    // Validate product status.
+    if (
+        !$error &&
+        !in_array($statusInput, ['0', '1'], true)
+    ) {
+        $error = 'Please select a valid product status.';
+    }
+
+    // Resolve or create category.
     $newCategoryId = null;
 
-    if (!$error && $categoryInput !== '') {
-        $newCategoryId = filter_var(
-            $categoryInput,
-            FILTER_VALIDATE_INT
-        );
+    if (!$error && $categoryName !== '') {
 
-        if ($newCategoryId === false) {
-            $error = 'Please select a valid category.';
-        } else {
-            $check = $pdo->prepare(
-                "SELECT COUNT(*) FROM categories WHERE category_id = ?"
+        try {
+            // Look for an existing category.
+            $stmt = $pdo->prepare(
+                "SELECT category_id
+                 FROM categories
+                 WHERE LOWER(category_name) = LOWER(?)
+                 LIMIT 1"
             );
-            $check->execute([$newCategoryId]);
 
-            if (!$check->fetchColumn()) {
-                $error = 'The selected category does not exist.';
+            $stmt->execute([$categoryName]);
+
+            $existingCategory = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingCategory) {
+
+                $newCategoryId = (int)$existingCategory['category_id'];
+
+            } else {
+
+                // Create a new category.
+                $stmt = $pdo->prepare(
+                    "INSERT INTO categories
+                     (category_name, description)
+                     VALUES (?, ?)"
+                );
+
+                $stmt->execute([$categoryName, null]);
+
+                $newCategoryId = (int)$pdo->lastInsertId();
+            }
+
+        } catch (PDOException $e) {
+
+            // Check if another request created the category.
+            try {
+                $stmt = $pdo->prepare(
+                    "SELECT category_id
+                     FROM categories
+                     WHERE LOWER(category_name) = LOWER(?)
+                     LIMIT 1"
+                );
+
+                $stmt->execute([$categoryName]);
+
+                $existingCategory = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($existingCategory) {
+                    $newCategoryId = (int)$existingCategory['category_id'];
+                } else {
+                    $error = 'Could not find or create the category.';
+                }
+
+            } catch (PDOException $lookupError) {
+                $error = 'Could not find or create the category.';
             }
         }
     }
 
-    // Validate product status
-    if (!$error && !in_array($statusInput, ['0', '1'], true)) {
-        $error = 'Please select a valid product status.';
-    }
-
+    // Keep current image unless a new image is uploaded.
     $newImagePath = $imagePath;
     $uploadedNewImage = false;
+    $uploadedImageFullPath = null;
 
-    // Upload a new image only when a file was selected.
+    // Handle image upload.
     if (
         !$error &&
         isset($_FILES['image']) &&
         $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE
     ) {
+
         if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-            $error = 'Image upload failed.';
+
+            $error = 'Image upload failed. Please try again.';
+
         } elseif ($_FILES['image']['size'] > 5 * 1024 * 1024) {
+
             $error = 'Image must be smaller than 5 MB.';
+
         } else {
+
             $tmp = $_FILES['image']['tmp_name'];
             $imageInfo = @getimagesize($tmp);
 
@@ -163,28 +246,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mime = $imageInfo['mime'] ?? '';
 
             if (!$imageInfo || !isset($allowedTypes[$mime])) {
+
                 $error = 'Upload a valid JPG, PNG, WEBP, or GIF image.';
+
             } else {
+
                 $imageDirectory = __DIR__ . '/../assets/images/';
 
                 if (
                     !is_dir($imageDirectory) &&
                     !mkdir($imageDirectory, 0755, true)
                 ) {
+
                     $error = 'Could not create the image directory.';
+
                 } elseif (!is_writable($imageDirectory)) {
+
                     $error = 'The image directory is not writable.';
+
                 } else {
+
                     $filename = bin2hex(random_bytes(16))
                         . '.' . $allowedTypes[$mime];
 
-                    if (move_uploaded_file(
-                        $tmp,
-                        $imageDirectory . $filename
-                    )) {
+                    $fullPath = $imageDirectory . $filename;
+
+                    if (move_uploaded_file($tmp, $fullPath)) {
+
                         $newImagePath = 'assets/images/' . $filename;
+                        $uploadedImageFullPath = $fullPath;
                         $uploadedNewImage = true;
+
                     } else {
+
                         $error = 'Could not save the uploaded image.';
                     }
                 }
@@ -192,68 +286,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Update the database
+    // Update product in database.
     if (!$error) {
+
         try {
-            $update = $pdo->prepare(
+            $stmt = $pdo->prepare(
                 "UPDATE products
-                 SET category_id = :category_id,
-                     product_name = :product_name,
-                     description = :description,
-                     price = :price,
-                     quantity = :quantity,
-                     image = :image,
-                     is_active = :is_active
+                 SET
+                    category_id = :category_id,
+                    product_name = :product_name,
+                    description = :description,
+                    price = :price,
+                    quantity = :quantity,
+                    image = :image,
+                    is_active = :is_active
                  WHERE product_id = :product_id"
             );
 
-            $update->execute([
+            $stmt->execute([
                 ':category_id' => $newCategoryId,
                 ':product_name' => $name,
                 ':description' => $description,
-                ':price' => number_format((float)$priceInput, 2, '.', ''),
+                ':price' => number_format(
+                    (float)$priceInput,
+                    2,
+                    '.',
+                    ''
+                ),
                 ':quantity' => (int)$quantityInput,
                 ':image' => $newImagePath,
                 ':is_active' => (int)$statusInput,
                 ':product_id' => $id
             ]);
 
-            // Keep the old image file; deleting files can break
-            // other pages if an image path is reused.
+            // Update successful.
             header('Location: products.php?updated=1');
             exit;
+
         } catch (PDOException $e) {
-            if ($uploadedNewImage) {
-                $savedImage = __DIR__ . '/../' . $newImagePath;
-                if (is_file($savedImage)) {
-                    unlink($savedImage);
-                }
+
+            // Remove newly uploaded image if update fails.
+            if (
+                $uploadedImageFullPath !== null &&
+                is_file($uploadedImageFullPath)
+            ) {
+                unlink($uploadedImageFullPath);
             }
+
+            error_log('Edit product update error: ' . $e->getMessage());
 
             $error = 'Could not update the product. Please try again.';
         }
     }
 
-    // Preserve the submitted values if validation fails.
-    $categoryId = $categoryInput === '' ? null : $categoryInput;
-
+    // Preserve submitted status after an error.
     if (in_array($statusInput, ['0', '1'], true)) {
         $isActive = (int)$statusInput;
     }
 
-    if ($uploadedNewImage && $error) {
+    // Keep old image if submission fails.
+    if ($error && $uploadedNewImage) {
         $newImagePath = $imagePath;
     }
 
     $imagePath = $newImagePath;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Product | Afghan Antique Store>
+
+    <title>Edit Product | Afghan Antique Store</title>
 
     <style>
         * {
@@ -262,16 +369,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         :root {
             --cream: #f7f3eb;
-            --white: #fff;
+            --white: #ffffff;
             --brown: #382719;
             --brown-light: #60442e;
             --gold: #b89558;
+            --gold-light: #e9dcc3;
             --text: #332a22;
             --muted: #81776b;
             --border: #e5ddd0;
         }
 
         body {
+            min-height: 100vh;
             margin: 0;
             padding: 30px 16px 50px;
             background: var(--cream);
@@ -281,7 +390,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .container {
-            max-width: 900px;
+            width: min(900px, 100%);
             margin: 0 auto;
         }
 
@@ -318,6 +427,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-height: 45px;
             padding: 11px 17px;
             border: 1px solid var(--border);
             border-radius: 7px;
@@ -478,10 +588,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 grid-column: auto;
             }
 
-            .header .btn {
-                width: 100%;
-            }
-
+            .header .btn,
             .actions .btn {
                 width: 100%;
             }
@@ -490,9 +597,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+
 <div class="container">
 
     <header class="header">
+
         <div>
             <div class="eyebrow">AFGHAN ANTIQUE STORE</div>
             <h1>Edit Product</h1>
@@ -501,21 +610,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
         </div>
 
-        <a href="products.php" class="btn">← Back to Inventory</a>
+        <a href="products.php" class="btn">
+            Back to Inventory
+        </a>
+
     </header>
 
     <main class="panel">
+
         <h2 class="panel-title">
             Product #<?= (int)$product['product_id'] ?>
         </h2>
 
         <?php if ($error): ?>
-            <div class="error">
+            <div class="error" role="alert">
                 <?= h($error) ?>
             </div>
         <?php endif; ?>
 
         <form method="POST" enctype="multipart/form-data">
+
             <input
                 type="hidden"
                 name="csrf_token"
@@ -523,8 +637,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             >
 
             <div class="form-grid">
+
                 <div class="field full-width">
                     <label for="product_name">Product Name *</label>
+
                     <input
                         type="text"
                         id="product_name"
@@ -535,29 +651,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     >
                 </div>
 
-                <div class="field">
-                    <label for="category_id">Category</label>
-                    <select id="category_id" name="category_id">
-                        <option value="">Uncategorized</option>
-                        <?php foreach ($categories as $category): ?>
-                            <option
-                                value="<?= (int)$category['category_id'] ?>"
-                                <?= (string)$categoryId ===
-                                    (string)$category['category_id']
-                                    ? 'selected' : '' ?>
-                            >
-                                <?= h($category['category_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="field full-width">
+                    <label for="category_name">Category</label>
+
+                    <input
+                        type="text"
+                        id="category_name"
+                        name="category_name"
+                        maxlength="100"
+                        placeholder="e.g., Clocks, Furniture, Afghan Carpets"
+                        value="<?= h($categoryName) ?>"
+                    >
+
+                    <span class="hint">
+                        Enter an existing category or type a new category.
+                        New categories are created automatically.
+                        Leave blank for Uncategorized.
+                    </span>
                 </div>
 
                 <div class="field">
                     <label for="is_active">Product Status *</label>
+
                     <select id="is_active" name="is_active" required>
                         <option value="1" <?= $isActive === 1 ? 'selected' : '' ?>>
                             Active
                         </option>
+
                         <option value="0" <?= $isActive === 0 ? 'selected' : '' ?>>
                             Inactive
                         </option>
@@ -566,6 +686,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field">
                     <label for="price">Price ($) *</label>
+
                     <input
                         type="number"
                         id="price"
@@ -580,6 +701,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="field">
                     <label for="quantity">Stock Quantity *</label>
+
                     <input
                         type="number"
                         id="quantity"
@@ -592,45 +714,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field full-width">
-                    <label for="description">Description</label>
+                    <label for="description">Product Description</label>
+
                     <textarea
                         id="description"
                         name="description"
+                        placeholder="Describe the product, its style, materials, and history..."
                     ><?= h($description) ?></textarea>
                 </div>
 
                 <div class="field full-width">
                     <label for="image">Replace Product Image</label>
+
                     <input
                         type="file"
                         id="image"
                         name="image"
                         accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
                     >
+
                     <span class="hint">
                         Optional. Leave empty to keep the current image.
-                        JPG, PNG, WEBP, or GIF; maximum 5 MB.
+                        JPG, PNG, WEBP, or GIF. Maximum 5 MB.
                     </span>
 
                     <div class="image-preview">
+
                         <img
                             id="imagePreview"
-                            src="<?= !empty($imagePath)
-                                ? '../' . h($imagePath)
-                                : '' ?>"
+                            src="<?= !empty($imagePath) ? '../' . h($imagePath) : '' ?>"
                             alt="Current product image"
                             <?= empty($imagePath) ? 'hidden' : '' ?>
                         >
+
                         <div class="image-description" id="imageDescription">
                             <?= !empty($imagePath)
                                 ? 'Current product image'
                                 : 'No product image uploaded yet.' ?>
                         </div>
+
                     </div>
                 </div>
+
             </div>
 
             <div class="actions">
+
                 <button type="submit" class="btn btn-primary">
                     Save Changes
                 </button>
@@ -638,9 +767,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="products.php" class="btn">
                     Cancel
                 </a>
+
             </div>
+
         </form>
+
     </main>
+
 </div>
 
 <script>
@@ -649,6 +782,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const imageDescription = document.getElementById('imageDescription');
 
     imageInput.addEventListener('change', function () {
+
         const file = this.files[0];
 
         if (!file) return;
@@ -660,8 +794,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'image/gif'
         ];
 
-        if (!allowedTypes.includes(file.type) ||
-            file.size > 5 * 1024 * 1024) {
+        if (
+            !allowedTypes.includes(file.type) ||
+            file.size > 5 * 1024 * 1024
+        ) {
             alert('Choose a JPG, PNG, WEBP, or GIF image smaller than 5 MB.');
             this.value = '';
             return;
@@ -672,5 +808,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         imageDescription.textContent = 'New image preview';
     });
 </script>
+
 </body>
 </html>
