@@ -99,7 +99,7 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 
 ## Sprint 2 Final Outcome – October 28, 2026
 
-**Completed User Stories:** US04, US05, US06, US07, US08, US010
+**Completed User Stories:** US04, US05, US06, US07, US08, US010, US019
 
 
 **Sprint 2 Final Status:** Product Owner reviewed and accepted sprint 2 completion.
