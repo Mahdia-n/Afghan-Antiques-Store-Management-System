@@ -16,3 +16,6 @@ sprint 2 Progress Meeting: https://drive.google.com/file/d/13fxc2-rlWWlqRAFrbxmr
 
 sprint 2 Review + Retrospective: https://drive.google.com/file/d/1LE2rFTsGk7i_48MFWm1rNyOLGC0CxlkK/view?usp=sharing
 
+Sprint 3 Planning: https://drive.google.com/file/d/1rkkDyKwKgJ2H8UgRAy1JmdfwtfvKgmqg/view?usp=sharing
+
+Sprint 3 Progress Meeting: https://drive.google.com/file/d/1Pww9l6VeZd1JmgSINAXKKop-Wp1FZ2Fr/view?usp=sharing
