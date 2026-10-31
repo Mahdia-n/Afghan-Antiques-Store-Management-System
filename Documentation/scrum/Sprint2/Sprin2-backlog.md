@@ -22,13 +22,13 @@ Develop the main shopping features of the Afghan Antiques Store Management Syste
 
 | ID | User Story | Priority | Current Progress |
 |---|---|---|---|
-| US04 | As a customer, I want to browse available Afghan antique products so that I can explore items for sale. | High | Carried over from Sprint 1; completion needs confirmation |
-| US05 | As a customer, I want to view product photos, descriptions, and prices so that I can decide what to purchase. | High | To Do |
-| US06 | As a customer, I want to search for products by name so that I can quickly find an antique I am interested in. | High | To Do |
-| US07 | Add products to the shopping cart | High | To Do |
-| US08 | Change quantities or remove items from the shopping cart | High | To Do |
-| US10 | As a customer, I want to provide a delivery address so that my order can be sent to the correct location. | High | To Do |
-| US19 | As a customer, I want to save favorite products to a wishlist so that I can revisit them and purchase them later. | Low | To Do |
+| US04 | As a customer, I want to browse available Afghan antique products so that I can explore items for sale. | High | Carried over from Sprint 1; Done |
+| US05 | As a customer, I want to view product photos, descriptions, and prices so that I can decide what to purchase. | High | Done |
+| US06 | As a customer, I want to search for products by name so that I can quickly find an antique I am interested in. | High | Done |
+| US07 | Add products to the shopping cart | High | Done |
+| US08 | Change quantities or remove items from the shopping cart | High | Done |
+| US10 | As a customer, I want to provide a delivery address so that my order can be sent to the correct location. | High | Done |
+| US19 | As a customer, I want to save favorite products to a wishlist so that I can revisit them and purchase them later. | Low | Done |
 
 
 **Note:** These six user stories were selected by the team for Sprint 2. US04 was carried forward because its full completion was not confirmed during Sprint 1.
