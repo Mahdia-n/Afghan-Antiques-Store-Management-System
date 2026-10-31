@@ -11,7 +11,7 @@
 
 - The group talked about the upcoming Sprint 2 development priorities.
 - The Product Owner talked about the user stories to be included in Sprint 2 and went over the Product Backlog.
-- For the upcoming Sprint 2 work, the team chose US04, US05, US06, US10, US11, and US19.
+- For the upcoming Sprint 2 work, the team chose US04, US05, US06, US07, US08, and US10.
 - The functioning of shopping carts and other product features will be the primary emphasis of Sprint 2.
 - During this planning discussion, no Sprint 2 development work was tested or displayed.
 
@@ -31,7 +31,7 @@
 ## 4. Sprint Backlog Changes
 
 - **Tasks completed:** Sprint 2 user story selection and planning discussion.
-- **Tasks added or clarified:** US04, US05, US06, US10, US11, and US19 were selected for Sprint 2 development.
+- **Tasks added or clarified:** US04, US05, US06, US07, US08, and US10 were selected for Sprint 2 development.
 - **Tasks removed or rescheduled:** None confirmed during this meeting.
 - **Reason for changes:** To focus Sprint 2 on shopping cart functionality and related product features.
 - **Persons consulted:** Product Owner, Scrum Master, and participating team members.
