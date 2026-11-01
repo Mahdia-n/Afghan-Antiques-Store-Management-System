@@ -1,135 +1,330 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__ . '/config/database.php';
 
-function escapeHtml($value) {
+// Escape output safely
+function escapeHtml($value): string
+{
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-// Current products used by the cart.
-// These IDs must match the corresponding products in your database.
-$products = [
-    1 => [
-        "name" => "Afghan Antique Mantel Clock",
-        "price" => 185.00,
-        "image" => "assets/images/antique-mantel-clock.png"
-    ],
-    2 => [
-        "name" => "Traditional Ceramic Vase",
-        "price" => 95.00,
-        "image" => "assets/images/ceramic-vase.png"
-    ],
-    3 => [
-        "name" => "Vintage Wooden Cabinet",
-        "price" => 450.00,
-        "image" => "assets/images/vintage-wooden-cabinet.png"
-    ],
-    4 => [
-        "name" => "Victorian Table Lamp",
-        "price" => 125.00,
-        "image" => "assets/images/victorian-table-lamp.png"
-    ]
-];
-
+// Initialize cart
 if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
+// Store a message and redirect after POST
+function redirectCart(string $type, string $message): void
+{
+    $_SESSION['cart_flash'] = [
+        'type' => $type,
+        'message' => $message
+    ];
+
+    header('Location: cart.php');
+    exit;
+}
+
+// Retrieve flash message
+$flash = $_SESSION['cart_flash'] ?? null;
+unset($_SESSION['cart_flash']);
+
 $message = '';
 $error = '';
 
-// Handle adding, updating, and removing cart items.
+if (is_array($flash)) {
+    if (($flash['type'] ?? '') === 'success') {
+        $message = $flash['message'] ?? '';
+    } else {
+        $error = $flash['message'] ?? '';
+    }
+}
+
+// Handle cart actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $action = $_POST['action'] ?? '';
     $id = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
 
     if ($action === 'add') {
+
         $quantity = filter_input(
             INPUT_POST,
             'quantity',
             FILTER_VALIDATE_INT
         );
 
-        if (!$id || !isset($products[$id])) {
-            $error = 'This product could not be found in the cart.';
-        } else {
-            $quantity = ($quantity && $quantity > 0)
-                ? min($quantity, 99)
-                : 1;
+        if ($id === false || $id === null || $id < 1) {
+            redirectCart('error', 'Invalid product selected.');
+        }
 
+        if ($quantity === false || $quantity === null || $quantity < 1) {
+            redirectCart('error', 'Please enter a valid quantity.');
+        }
+
+        try {
+            // Get product directly from database
+            $stmt = $pdo->prepare("
+                SELECT product_id, product_name, quantity
+                FROM products
+                WHERE product_id = ?
+                  AND is_active = 1
+                LIMIT 1
+            ");
+
+            $stmt->execute([$id]);
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$product) {
+                redirectCart('error', 'This product is no longer available.');
+            }
+
+            $availableStock = (int)$product['quantity'];
             $currentQuantity = (int)($_SESSION['cart'][$id] ?? 0);
 
-            $_SESSION['cart'][$id] = min(
-                99,
-                $currentQuantity + $quantity
+            if ($availableStock <= 0) {
+                redirectCart('error', 'This product is currently out of stock.');
+            }
+
+            $requestedQuantity = $currentQuantity + $quantity;
+
+            if ($requestedQuantity > $availableStock) {
+                redirectCart(
+                    'error',
+                    'Only ' . $availableStock . ' item(s) are available in stock.'
+                );
+            }
+
+            if ($requestedQuantity > 99) {
+                redirectCart('error', 'You cannot add more than 99 items.');
+            }
+
+            $_SESSION['cart'][$id] = $requestedQuantity;
+
+            redirectCart(
+                'success',
+                $product['product_name'] . ' added to your cart.'
             );
 
-            $message = $products[$id]['name'] . ' added to your cart.';
+        } catch (PDOException $e) {
+            error_log('Cart add error: ' . $e->getMessage());
+
+            redirectCart(
+                'error',
+                'Unable to add this product. Please try again.'
+            );
         }
+
     } elseif ($action === 'update') {
+
         $quantity = filter_input(
             INPUT_POST,
             'quantity',
             FILTER_VALIDATE_INT
         );
 
-        if ($id && isset($products[$id])) {
-            if ($quantity !== false && $quantity !== null
-                && $quantity >= 1 && $quantity <= 99) {
-                $_SESSION['cart'][$id] = $quantity;
-                $message = 'Cart quantity updated.';
-            } else {
-                $error = 'Please enter a quantity between 1 and 99.';
-            }
+        if ($id === false || $id === null || $id < 1) {
+            redirectCart('error', 'Invalid product selected.');
         }
-    } elseif ($action === 'remove') {
-        if ($id) {
-            unset($_SESSION['cart'][$id]);
-            $message = 'Item removed from your cart.';
-        }
-    }
 
-    // Redirect after update/remove to prevent repeated submissions.
-    if ($action === 'update' || $action === 'remove') {
-        header('Location: cart.php');
-        exit;
+        if ($quantity === false || $quantity === null
+            || $quantity < 1 || $quantity > 99) {
+            redirectCart(
+                'error',
+                'Please enter a quantity between 1 and 99.'
+            );
+        }
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT product_id, product_name, quantity
+                FROM products
+                WHERE product_id = ?
+                  AND is_active = 1
+                LIMIT 1
+            ");
+
+            $stmt->execute([$id]);
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$product) {
+                unset($_SESSION['cart'][$id]);
+
+                redirectCart(
+                    'error',
+                    'This product is no longer available and was removed from your cart.'
+                );
+            }
+
+            $availableStock = (int)$product['quantity'];
+
+            if ($availableStock <= 0) {
+                unset($_SESSION['cart'][$id]);
+
+                redirectCart(
+                    'error',
+                    'This product is out of stock and was removed from your cart.'
+                );
+            }
+
+            if ($quantity > $availableStock) {
+                redirectCart(
+                    'error',
+                    'Only ' . $availableStock . ' item(s) are available in stock.'
+                );
+            }
+
+            $_SESSION['cart'][$id] = $quantity;
+
+            redirectCart('success', 'Cart quantity updated.');
+
+        } catch (PDOException $e) {
+            error_log('Cart update error: ' . $e->getMessage());
+
+            redirectCart(
+                'error',
+                'Unable to update your cart. Please try again.'
+            );
+        }
+
+    } elseif ($action === 'remove') {
+
+        if ($id === false || $id === null || $id < 1) {
+            redirectCart('error', 'Invalid product selected.');
+        }
+
+        unset($_SESSION['cart'][$id]);
+
+        redirectCart('success', 'Item removed from your cart.');
+
+    } else {
+
+        redirectCart('error', 'Invalid cart action.');
     }
 }
 
-// Build the cart and calculate the subtotal.
-$cartItems = [];
-$subtotal = 0;
+// Build a clean list of product IDs in the cart
+$productIds = [];
 
 foreach ($_SESSION['cart'] as $id => $quantity) {
-    $id = (int)$id;
-    $quantity = (int)$quantity;
+    $id = filter_var($id, FILTER_VALIDATE_INT);
+    $quantity = filter_var($quantity, FILTER_VALIDATE_INT);
 
-    if (isset($products[$id]) && $quantity > 0) {
-        $product = $products[$id];
-        $itemTotal = $product['price'] * $quantity;
+    if ($id !== false && $id !== null && $id > 0
+        && $quantity !== false && $quantity !== null
+        && $quantity > 0) {
 
-        $cartItems[] = [
-            'id' => $id,
-            'name' => $product['name'],
-            'price' => $product['price'],
-            'image' => $product['image'],
-            'quantity' => $quantity,
-            'total' => $itemTotal
-        ];
+        $productIds[] = $id;
 
-        $subtotal += $itemTotal;
+    } else {
+        unset($_SESSION['cart'][(string)$id]);
     }
 }
 
-$cartCount = array_sum($_SESSION['cart']);
+// Retrieve all cart products from MySQL
+$cartItems = [];
+$subtotal = 0;
+$cartCount = 0;
+$databaseError = false;
 
+if (!empty($productIds)) {
+
+    try {
+        $placeholders = implode(
+            ',',
+            array_fill(0, count($productIds), '?')
+        );
+
+        $stmt = $pdo->prepare("
+            SELECT
+                p.product_id,
+                p.product_name,
+                p.description,
+                p.price,
+                p.quantity,
+                p.image,
+                p.is_active
+            FROM products p
+            WHERE p.product_id IN ($placeholders)
+              AND p.is_active = 1
+        ");
+
+        $stmt->execute($productIds);
+
+        $databaseProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $productsById = [];
+
+        foreach ($databaseProducts as $product) {
+            $productsById[(int)$product['product_id']] = $product;
+        }
+
+        // Build cart display items
+        foreach ($_SESSION['cart'] as $id => $quantity) {
+
+            $id = (int)$id;
+            $quantity = (int)$quantity;
+
+            // Remove products that no longer exist or are inactive
+            if (!isset($productsById[$id])) {
+                unset($_SESSION['cart'][$id]);
+                continue;
+            }
+
+            $product = $productsById[$id];
+            $availableStock = (int)$product['quantity'];
+
+            // Remove products that are out of stock
+            if ($availableStock <= 0) {
+                unset($_SESSION['cart'][$id]);
+                continue;
+            }
+
+            // Adjust cart quantity if stock has decreased
+            if ($quantity > $availableStock) {
+                $quantity = $availableStock;
+                $_SESSION['cart'][$id] = $quantity;
+
+                if ($message === '' && $error === '') {
+                    $message = 'Some cart quantities were adjusted to match available stock.';
+                }
+            }
+
+            $price = (float)$product['price'];
+            $itemTotal = $price * $quantity;
+
+            $cartItems[] = [
+                'id' => $id,
+                'name' => $product['product_name'],
+                'price' => $price,
+                'image' => $product['image'] ?? '',
+                'quantity' => $quantity,
+                'total' => $itemTotal
+            ];
+
+            $subtotal += $itemTotal;
+            $cartCount += $quantity;
+        }
+
+    } catch (PDOException $e) {
+        error_log('Cart retrieval error: ' . $e->getMessage());
+        $databaseError = true;
+    }
+}
+
+// Checkout destination
 $checkoutUrl = isset($_SESSION['user_id'])
     ? 'checkout.php'
     : 'login.php?redirect=checkout.php';
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -331,7 +526,10 @@ $checkoutUrl = isset($_SESSION['user_id'])
 <body>
 
 <header class="cart-header">
-    <a href="index.php" class="cart-brand">Afghan Antiques</a>
+
+    <a href="index.php" class="cart-brand">
+        Afghan Antiques
+    </a>
 
     <nav class="cart-nav">
         <a href="index.php">Home</a>
@@ -339,6 +537,7 @@ $checkoutUrl = isset($_SESSION['user_id'])
         <a href="cart.php">Cart (<?= (int)$cartCount ?>)</a>
         <a href="wishlist_page.php">My Wishlist</a>
     </nav>
+
 </header>
 
 <main class="cart-container">
@@ -358,16 +557,31 @@ $checkoutUrl = isset($_SESSION['user_id'])
         </div>
     <?php endif; ?>
 
-    <?php if (empty($cartItems)): ?>
+    <?php if ($databaseError): ?>
+
+        <div class="cart-error">
+            We could not retrieve your cart right now.
+            Please refresh the page or try again later.
+        </div>
+
+    <?php elseif (empty($cartItems)): ?>
 
         <section class="cart-empty">
-            <h2>Your cart is empty</h2>
-            <p>Discover something special from our antique collection.</p>
 
-            <a href="products.php" class="cart-primary-button"
-               style="max-width:260px;margin:20px auto;">
+            <h2>Your cart is empty</h2>
+
+            <p>
+                Discover something special from our antique collection.
+            </p>
+
+            <a
+                href="products.php"
+                class="cart-primary-button"
+                style="max-width:260px;margin:20px auto;"
+            >
                 Explore the Collection
             </a>
+
         </section>
 
     <?php else: ?>
@@ -375,16 +589,32 @@ $checkoutUrl = isset($_SESSION['user_id'])
         <div class="cart-layout">
 
             <section>
+
                 <?php foreach ($cartItems as $item): ?>
+
                     <article class="cart-item">
 
-                        <img
-                            src="<?= escapeHtml($item['image']) ?>"
-                            alt="<?= escapeHtml($item['name']) ?>"
-                        >
+                        <?php if (!empty($item['image'])): ?>
+
+                            <img
+                                src="<?= escapeHtml($item['image']) ?>"
+                                alt="<?= escapeHtml($item['name']) ?>"
+                                onerror="this.style.display='none';"
+                            >
+
+                        <?php else: ?>
+
+                            <div class="image-placeholder">
+                                Image unavailable
+                            </div>
+
+                        <?php endif; ?>
 
                         <div class="cart-item-details">
-                            <h2><?= escapeHtml($item['name']) ?></h2>
+
+                            <h2>
+                                <?= escapeHtml($item['name']) ?>
+                            </h2>
 
                             <p>
                                 Price: $<?= number_format($item['price'], 2) ?>
@@ -394,10 +624,20 @@ $checkoutUrl = isset($_SESSION['user_id'])
                                 Total: $<?= number_format($item['total'], 2) ?>
                             </p>
 
+                            <!-- Update quantity -->
                             <form method="POST" action="cart.php">
-                                <input type="hidden" name="action" value="update">
-                                <input type="hidden" name="product_id"
-                                       value="<?= (int)$item['id'] ?>">
+
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="update"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="product_id"
+                                    value="<?= (int)$item['id'] ?>"
+                                >
 
                                 <input
                                     type="number"
@@ -409,51 +649,91 @@ $checkoutUrl = isset($_SESSION['user_id'])
                                     required
                                 >
 
-                                <button type="submit"
-                                        class="cart-button cart-update">
+                                <button
+                                    type="submit"
+                                    class="cart-button cart-update"
+                                >
                                     Update
                                 </button>
+
                             </form>
 
+                            <!-- Remove product -->
                             <form method="POST" action="cart.php">
-                                <input type="hidden" name="action" value="remove">
-                                <input type="hidden" name="product_id"
-                                       value="<?= (int)$item['id'] ?>">
 
-                                <button type="submit"
-                                        class="cart-button cart-remove">
+                                <input
+                                    type="hidden"
+                                    name="action"
+                                    value="remove"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="product_id"
+                                    value="<?= (int)$item['id'] ?>"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="cart-button cart-remove"
+                                >
                                     Remove
                                 </button>
+
                             </form>
+
                         </div>
 
                     </article>
+
                 <?php endforeach; ?>
 
-                <a href="products.php" class="cart-secondary-button">
-                    ← Continue Shopping
+                <a
+                    href="products.php"
+                    class="cart-secondary-button"
+                >
+                    &larr; Continue Shopping
                 </a>
+
             </section>
 
+            <!-- Order Summary -->
             <aside class="cart-summary">
+
                 <h2>Order Summary</h2>
 
                 <div class="cart-summary-row">
+
                     <span>Items (<?= (int)$cartCount ?>)</span>
-                    <span>$<?= number_format($subtotal, 2) ?></span>
+
+                    <span>
+                        $<?= number_format($subtotal, 2) ?>
+                    </span>
+
                 </div>
 
                 <div class="cart-summary-row">
+
                     <strong>Subtotal</strong>
-                    <strong>$<?= number_format($subtotal, 2) ?></strong>
+
+                    <strong>
+                        $<?= number_format($subtotal, 2) ?>
+                    </strong>
+
                 </div>
 
-                <p>Shipping and any applicable taxes will be calculated during checkout.</p>
+                <p>
+                    Shipping and any applicable taxes will be calculated
+                    during checkout.
+                </p>
 
-                <a href="<?= escapeHtml($checkoutUrl) ?>"
-                   class="cart-primary-button">
-                    Proceed to Checkout →
+                <a
+                    href="<?= escapeHtml($checkoutUrl) ?>"
+                    class="cart-primary-button"
+                >
+                    Proceed to Checkout &rarr;
                 </a>
+
             </aside>
 
         </div>
@@ -463,7 +743,11 @@ $checkoutUrl = isset($_SESSION['user_id'])
 </main>
 
 <footer class="cart-footer">
-    <p>© <?= date('Y') ?> Afghan Antiques. All rights reserved.</p>
+
+    <p>
+        &copy; <?= date('Y') ?> Afghan Antiques. All rights reserved.
+    </p>
+
 </footer>
 
 </body>
