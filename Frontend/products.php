@@ -94,6 +94,7 @@ try {
         <input
             type="search"
             name="search"
+            class="search-input"
             placeholder="Search antiques..."
             value="<?= e($search) ?>"
         >
