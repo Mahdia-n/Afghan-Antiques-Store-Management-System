@@ -63,4 +63,4 @@ Follow-up actions:
 
 •	The Product Owner will review completed functionality and update the Product Backlog after testing.
 
-## Documentation updated by: Mahdia Noori (Scrum Master)
+## Documented by: Mahdia Noori (Scrum Master)

@@ -1,8 +1,8 @@
+# Sprint 1 Backlog
+
 **Sprint dates:**  18–21 October
 
-
 **Sprint Goal:**  (Foundation and Customer Accounts) Set up the project, database, home page, product catalog, registration, login, and logout.
-## Selected User Stories
 
 ### Selected User Stories
 
@@ -71,5 +71,5 @@ For the complete meeting results, feedback, and lessons learned, see the separat
 
 **Sprint 1 Final Status:** Customer account features and home page successfully tested. Product catalog completion still needs confirmation. 
 
-
+**Documented by:** Mahdia Noori (Scrum Master)
 
