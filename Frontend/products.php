@@ -97,9 +97,10 @@ try {
             placeholder="Search antiques..."
             value="<?= e($search) ?>"
         >
-
         <button type="submit" class="primary-button">Search</button>
-        <a href="products.php" class="product-button">Clear</a>
+        <button type="submit" name="category" class="primary-button">
+            Clear 
+        </button>
     </form>
 
     <?php if ($dbError): ?>
