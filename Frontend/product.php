@@ -1,63 +1,77 @@
 <?php
+// Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$products = [
-    1 => [
-        'name' => 'Afghan Antique Mantel Clock',
-        'category' => 'Home Decor',
-        'description' => 'A timeless decorative clock inspired by traditional craftsmanship. This distinctive piece brings vintage character and warmth to your home.',
-        'price' => 185.00,
-        'quantity' => 4,
-        'image' => 'assets/images/antique-mantel-clock.png'
-    ],
-    2 => [
-        'name' => 'Traditional Ceramic Vase',
-        'category' => 'Pottery',
-        'description' => 'A beautiful ceramic piece inspired by Afghan artistic heritage. Display it as a centerpiece or as part of your antique collection.',
-        'price' => 95.00,
-        'quantity' => 6,
-        'image' => 'assets/images/ceramic-vase.png'
-    ],
-    3 => [
-        'name' => 'Vintage Wooden Cabinet',
-        'category' => 'Furniture',
-        'description' => 'A vintage-inspired wooden cabinet with a warm, traditional appearance, ideal for adding character to your living space.',
-        'price' => 450.00,
-        'quantity' => 2,
-        'image' => 'assets/images/vintage-wooden-cabinet.png'
-    ],
-    4 => [
-        'name' => 'Victorian Table Lamp',
-        'category' => 'Lighting',
-        'description' => 'An elegant vintage-style table lamp that adds timeless charm and a classic atmosphere to your interior.',
-        'price' => 125.00,
-        'quantity' => 3,
-        'image' => 'assets/images/victorian-table-lamp.png'
-    ]
-];
+// Database connection
+require_once __DIR__ . '/config/database.php';
 
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-
-$product = ($id !== false && $id !== null && $id > 0)
-    ? ($products[$id] ?? null)
-    : null;
-
+// Escape output safely
 function e($value): string
 {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
+
+// Get product ID from URL
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+$product = null;
+$databaseError = false;
+
+// Retrieve product from MySQL
+if ($id !== false && $id !== null && $id > 0) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT
+                p.product_id,
+                p.product_name,
+                p.description,
+                p.price,
+                p.quantity,
+                p.image,
+                p.is_active,
+                c.category_name
+            FROM products p
+            LEFT JOIN categories c
+                ON p.category_id = c.category_id
+            WHERE p.product_id = ?
+              AND p.is_active = 1
+            LIMIT 1
+        ");
+
+        $stmt->execute([$id]);
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+        error_log('Product details error: ' . $e->getMessage());
+        $databaseError = true;
+    }
+}
+
+// Prepare product information
+if ($product) {
+    $productName = $product['product_name'];
+    $productCategory = $product['category_name'] ?? 'Antiques';
+    $productDescription = $product['description'] ?? '';
+    $productPrice = (float)$product['price'];
+    $productQuantity = (int)$product['quantity'];
+    $productImage = $product['image'] ?? '';
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title><?= $product
-        ? e($product['name']) . ' | Afghan Antiques'
-        : 'Product Not Found | Afghan Antiques' ?></title>
+    <title>
+        <?= $product
+            ? e($productName) . ' | Afghan Antiques'
+            : 'Product Not Found | Afghan Antiques' ?>
+    </title>
 
     <link rel="stylesheet" href="assets/css/style.css">
 
@@ -139,6 +153,7 @@ function e($value): string
         }
     </style>
 </head>
+
 <body>
 
 <header>
@@ -146,10 +161,13 @@ function e($value): string
         <a href="index.php">Home</a>
         <a href="products.php">Products</a>
         <a href="about.php">About Us</a>
+
         <a href="cart.php">
             Cart (<?= isset($_SESSION['cart'])
-                ? (int)array_sum($_SESSION['cart']) : 0 ?>)
+                ? (int)array_sum($_SESSION['cart'])
+                : 0 ?>)
         </a>
+
         <a href="wishlist_page.php">My Wishlist</a>
 
         <?php if (isset($_SESSION['user_id'])): ?>
@@ -162,7 +180,18 @@ function e($value): string
 
 <main class="product-details-page">
 
-    <?php if ($product): ?>
+    <?php if ($databaseError): ?>
+
+        <section class="product-not-found">
+            <h1>Unable to Load Product</h1>
+            <p>We are currently unable to retrieve this product. Please try again later.</p>
+
+            <a class="product-button" href="products.php">
+                Browse Products
+            </a>
+        </section>
+
+    <?php elseif ($product): ?>
 
         <a class="back-link" href="products.php">
             &larr; Back to Collection
@@ -171,35 +200,47 @@ function e($value): string
         <section class="product-details">
 
             <div class="product-details-image">
-                <img
-                    src="<?= e($product['image']) ?>"
-                    alt="<?= e($product['name']) ?>"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
 
-                <div class="image-placeholder" style="display:none;">
-                    Product image unavailable
-                </div>
+                <?php if (!empty($productImage)): ?>
+
+                    <img
+                        src="<?= e($productImage) ?>"
+                        alt="<?= e($productName) ?>"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    >
+
+                    <div class="image-placeholder" style="display:none;">
+                        Product image unavailable
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="image-placeholder">
+                        Product image unavailable
+                    </div>
+
+                <?php endif; ?>
+
             </div>
 
             <div class="product-details-info">
 
                 <p class="product-category">
-                    <?= e($product['category']) ?>
+                    <?= e($productCategory) ?>
                 </p>
 
-                <h1><?= e($product['name']) ?></h1>
+                <h1><?= e($productName) ?></h1>
 
                 <p class="details-price">
-                    $<?= number_format($product['price'], 2) ?>
+                    $<?= number_format($productPrice, 2) ?>
                 </p>
 
                 <p class="details-description">
-                    <?= e($product['description']) ?>
+                    <?= nl2br(e($productDescription)) ?>
                 </p>
 
                 <p class="stock-status">
-                    <?= $product['quantity'] > 0
+                    <?= $productQuantity > 0
                         ? 'Available in our collection'
                         : 'Currently unavailable' ?>
                 </p>
@@ -210,17 +251,19 @@ function e($value): string
 
                 <div class="product-actions">
 
+                    <!-- Add to Cart -->
                     <form
                         action="cart.php"
                         method="POST"
                         class="add-to-cart-form"
                     >
+
                         <input type="hidden" name="action" value="add">
 
                         <input
                             type="hidden"
                             name="product_id"
-                            value="<?= (int)$id ?>"
+                            value="<?= (int)$product['product_id'] ?>"
                         >
 
                         <input
@@ -229,28 +272,31 @@ function e($value): string
                             name="quantity"
                             value="1"
                             min="1"
-                            max="<?= (int)$product['quantity'] ?>"
+                            max="<?= $productQuantity ?>"
                             required
-                            <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
+                            <?= $productQuantity < 1 ? 'disabled' : '' ?>
                         >
 
                         <button
                             type="submit"
-                            <?= $product['quantity'] < 1 ? 'disabled' : '' ?>
+                            <?= $productQuantity < 1 ? 'disabled' : '' ?>
                         >
                             Add to Cart
                         </button>
+
                     </form>
 
+                    <!-- Add to Wishlist -->
                     <form
                         method="POST"
                         action="wishlist.php"
                         class="wishlist-form"
                     >
+
                         <input
                             type="hidden"
                             name="product_name"
-                            value="<?= e($product['name']) ?>"
+                            value="<?= e($productName) ?>"
                         >
 
                         <button
@@ -259,24 +305,30 @@ function e($value): string
                         >
                             ♡ Add to Wishlist
                         </button>
+
                     </form>
 
                 </div>
+
             </div>
+
         </section>
 
     <?php else: ?>
 
         <section class="product-not-found">
+
             <h1>Product Not Found</h1>
 
             <p>
-                This product does not exist in our current preview collection.
+                This product does not exist or is currently unavailable
+                in our collection.
             </p>
 
             <a class="product-button" href="products.php">
                 Browse Products
             </a>
+
         </section>
 
     <?php endif; ?>
