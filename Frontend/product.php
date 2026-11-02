@@ -156,7 +156,7 @@ if ($product) {
 
 <body>
 
-<header>
+<header class="site-header">
     <nav>
         <a href="index.php">Home</a>
         <a href="products.php">Products</a>
