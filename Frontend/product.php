@@ -335,10 +335,10 @@ if ($product) {
 
 </main>
 
-<footer>
-    <p>
-        &copy; <?= date('Y') ?> Afghan Antiques. All rights reserved.
-    </p>
+<footer class="site-footer">
+    <div class="footer-bottom">
+        &copy; <?= date('Y') ?> Afghan Antique Store. All rights reserved.
+    </div>
 </footer>
 
 </body>
