@@ -15,4 +15,8 @@ Purpose: Customer browses products, searches the collection, views product detai
 Purpose: Customer proceeds from the shopping cart to checkout and order processing.
 This diagram represents the intended checkout workflow.
 <img width="2662" height="2998" alt="mermaid-diagram (3)" src="https://github.com/user-attachments/assets/06608d14-3425-4c6a-9d9a-ef7991912f1d" />
-5. 
+5. Wishlist management diagram
+This diagram shows how a customer interacts with the website, PHP application, MySQL database, and shopping cart when managing wishlist items
+<img width="2504" height="4746" alt="mermaid-diagram (5)" src="https://github.com/user-attachments/assets/e8681b9b-7219-4a60-8478-89d9620095df" />
+
+Created by: Zohra Khwaja
