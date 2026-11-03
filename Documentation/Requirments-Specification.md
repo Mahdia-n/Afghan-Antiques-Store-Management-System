@@ -222,20 +222,9 @@ The system shall validate important information and maintain accurate customer, 
 **NFR08 – Maintainability**  
 The application code shall be organized and understandable so team members can fix problems and add features more easily.
 
----
-
-## Requirements Review
-
-**Prepared by:** Khadija Khalil – Product Owner
-
-**Technical Reviewer:** Shokrya Barak Insaf – Backend Developer
-
-**Status:** Draft – Awaiting Team Review
-
-**Note:** These requirements describe the planned system. They do not mean that all features have already been developed. The team will review the requirements and confirm implementation priorities according to the Product Backlog and Sprint Backlogs.
 
 # Created by: 
-# Zohra Khwaja 
-# Shokrya Barak Insaf
-# Khadija Khalil
-# Madiha Noori
+Zohra Khwaja 
+Shokrya Barak Insaf
+Khadija Khalil
+Madiha Noori
