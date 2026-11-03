@@ -19,4 +19,5 @@ This diagram represents the intended checkout workflow.
 This diagram shows how a customer interacts with the website, PHP application, MySQL database, and shopping cart when managing wishlist items
 <img width="2504" height="4746" alt="mermaid-diagram (5)" src="https://github.com/user-attachments/assets/e8681b9b-7219-4a60-8478-89d9620095df" />
 
+
 Created by: Zohra Khwaja
