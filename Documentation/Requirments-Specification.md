@@ -224,7 +224,7 @@ The application code shall be organized and understandable so team members can f
 
 
 # Created by: 
-Zohra Khwaja 
-Shokrya Barak Insaf
-Khadija Khalil
+Zohra Khwaja <br> 
+Shokrya Barak Insaf <br>
+Khadija Khalil <br>
 Madiha Noori
